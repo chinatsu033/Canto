@@ -6,6 +6,7 @@ import 'lyrics_provider.dart';
 import 'lrcapi.dart';
 import 'lrcshare.dart';
 import 'net.dart';
+import 'romanize.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models.dart';
 import 'palette.dart';
@@ -50,11 +51,29 @@ class CantoController extends ChangeNotifier {
   bool showRomanization = false;
   Map<int, String>? translation; // displayed line index -> text
   Map<int, String>? romanization;
+  bool romanizationAuto = false; // generated locally, not from LrcShare
   Color? _fallbackAccent; // from LrcShare cover, this playback only
+
+  /// UI language tag (e.g. 'ja', 'zh_Hant_HK'); null = follow system.
+  String? localeTag;
+
+  Future<void> setLocaleTag(String? tag) async {
+    localeTag = tag;
+    notifyListeners();
+    try {
+      final p = await SharedPreferences.getInstance();
+      if (tag == null) {
+        await p.remove('localeTag');
+      } else {
+        await p.setString('localeTag', tag);
+      }
+    } catch (_) {}
+  }
 
   Future<void> loadPrefs() async {
     try {
       final p = await SharedPreferences.getInstance();
+      localeTag = p.getString('localeTag');
       showTranslation = p.getBool('showTranslation') ?? false;
       showRomanization = p.getBool('showRomanization') ?? false;
       notifyListeners();
@@ -78,9 +97,15 @@ class CantoController extends ChangeNotifier {
   }
 
   Future<void> _loadExtras(NowPlaying np, LyricsResult res) async {
+    final key = np.trackKey;
+    if (res is SyncedLyrics) {
+      // Local fallback first (instant, offline); LrcShare overrides below.
+      romanization = autoRomanize(res.lines);
+      romanizationAuto = romanization != null;
+      notifyListeners();
+    }
     final ex = extras;
     if (ex == null) return;
-    final key = np.trackKey;
     final data = await ex.forTrack(np);
     if (_trackKey != key || data == null) return;
     if (res is SyncedLyrics) {
@@ -88,7 +113,11 @@ class CantoController extends ChangeNotifier {
       final tr = pickTranslation(data.versions, lang);
       final ro = pickRomanization(data.versions, lang);
       translation = tr == null ? null : alignByTimestamp(res.lines, tr.rows);
-      romanization = ro == null ? null : alignByTimestamp(res.lines, ro.rows);
+      final aligned = ro == null ? null : alignByTimestamp(res.lines, ro.rows);
+      if (aligned != null) {
+        romanization = aligned;
+        romanizationAuto = false;
+      }
     }
     if (np.artwork == null && data.song.cover != null) {
       try {
@@ -129,6 +158,7 @@ class CantoController extends ChangeNotifier {
       lyricsSource = null;
       translation = null;
       romanization = null;
+      romanizationAuto = false;
       _fallbackAccent = null;
       extras?.clear();
       if (np != null) _load(np);

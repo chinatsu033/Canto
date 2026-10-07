@@ -36,7 +36,8 @@ class MainActivity : FlutterActivity() {
                         "playPause" -> result.success(playPause())
                         "favorite" -> result.success(favorite())
                         "seek" -> result.success(seek((call.argument<Number>("positionMs") ?: 0).toLong()))
-                        "goToQueueItem" -> result.success(goTo(call.argument<String>("id")?.toLongOrNull()))
+                        "goToQueueItem" -> result.success(goTo(call.argument<String>("id")?.toLongOrNull(),
+                            (call.argument<Number>("offset") ?: 0).toInt()))
                         else -> result.notImplemented()
                     }
                 } catch (e: SecurityException) {
@@ -57,20 +58,26 @@ class MainActivity : FlutterActivity() {
             ?: list.firstOrNull { it.metadata != null }
     }
 
+    // Heuristic match on custom action id + label. Covers e.g. Spotify
+    // ("Add to Liked Songs"/ADD_TO_COLLECTION), NetEase/QQ/Kugou/Kuwo
+    // ("收藏", "喜欢", "我喜欢", "红心"), YouTube Music ("Like", thumbs up).
+    private val favWords = listOf("favorite", "favourite", "like", "love", "heart", "collect",
+        "save", "library", "add_to", "add to", "addto", "thumb_up", "thumbs_up", "thumbup", "star",
+        "收藏", "喜欢", "喜歡", "红心", "紅心", "我喜", "加心")
+    private val favExclude = listOf("dislike", "unlike", "remove", "unfav", "unsave", "un_like", "thumb_down",
+        "thumbs_down", "shuffle", "repeat", "取消", "移除", "不喜欢", "speed", "playlist_add", "queue")
+
     private fun favoriteAction(c: MediaController): PlaybackState.CustomAction? {
-        val words = listOf("favorite", "favourite", "like", "love", "heart", "collect",
-            "save", "library", "star", "收藏", "喜欢", "喜歡", "红心")
         return c.playbackState?.customActions?.firstOrNull { a ->
             val s = (a.action + " " + a.name).lowercase()
-            words.any { s.contains(it) } && !s.contains("dislike") && !s.contains("unlike")
+            favWords.any { s.contains(it) } && favExclude.none { s.contains(it) }
         }
     }
 
-    private fun canRate(c: MediaController): Boolean {
-        val actions = c.playbackState?.actions ?: 0L
-        return actions and PlaybackState.ACTION_SET_RATING != 0L &&
-            (c.ratingType == Rating.RATING_HEART || c.ratingType == Rating.RATING_THUMB_UP_DOWN)
-    }
+    private fun canRate(c: MediaController): Boolean =
+        c.ratingType == Rating.RATING_HEART || c.ratingType == Rating.RATING_THUMB_UP_DOWN ||
+            c.ratingType == Rating.RATING_5_STARS || c.ratingType == Rating.RATING_3_STARS ||
+            c.ratingType == Rating.RATING_4_STARS
 
     private fun snapshot(): Map<String, Any?>? {
         val c = controller() ?: return null
@@ -115,7 +122,10 @@ class MainActivity : FlutterActivity() {
                 PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE) != 0L),
             "canFavorite" to (favoriteAction(c) != null || canRate(c)),
             "canSeek" to (actions and PlaybackState.ACTION_SEEK_TO != 0L),
-            "canGoToQueueItem" to (actions and PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM != 0L),
+            "canGoToQueueItem" to (!queue.isNullOrEmpty() && (actions and (PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM or
+                PlaybackState.ACTION_SKIP_TO_NEXT or PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0L)),
+            "customActions" to (st?.customActions?.map { "${it.name} [${it.action}]" } ?: emptyList<String>()),
+            "ratingType" to c.ratingType,
             "queue" to queue?.takeIf { it.isNotEmpty() }?.map { q ->
                 mapOf(
                     "title" to (q.description.title?.toString() ?: ""),
@@ -152,11 +162,30 @@ class MainActivity : FlutterActivity() {
         return "ok"
     }
 
-    private fun goTo(id: Long?): String {
+    private val main = android.os.Handler(android.os.Looper.getMainLooper())
+
+    /** skipToQueueItem(queueId); if the app ignores it, step Next/Previous. */
+    private fun goTo(id: Long?, offset: Int): String {
         val c = controller() ?: return "unsupported"
-        if (id == null || (c.playbackState?.actions ?: 0L) and PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM == 0L) return "unsupported"
-        c.transportControls.skipToQueueItem(id)
-        return "ok"
+        val actions = c.playbackState?.actions ?: 0L
+        val canSkipTo = actions and PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM != 0L
+        val canStep = actions and (PlaybackState.ACTION_SKIP_TO_NEXT or PlaybackState.ACTION_SKIP_TO_PREVIOUS) != 0L
+        fun step() {
+            for (i in 0 until kotlin.math.abs(offset)) {
+                main.postDelayed({
+                    if (offset > 0) c.transportControls.skipToNext() else c.transportControls.skipToPrevious()
+                }, 350L * i)
+            }
+        }
+        if (id != null && canSkipTo) {
+            c.transportControls.skipToQueueItem(id)
+            main.postDelayed({
+                if (c.playbackState?.activeQueueItemId != id && offset != 0 && canStep) step()
+            }, 1200)
+            return "ok"
+        }
+        if (offset != 0 && canStep) { step(); return "ok" }
+        return "unsupported"
     }
 
     private fun favorite(): String {
@@ -166,8 +195,13 @@ class MainActivity : FlutterActivity() {
             return "ok"
         }
         if (canRate(c)) {
-            val r = if (c.ratingType == Rating.RATING_HEART) Rating.newHeartRating(true)
-                else Rating.newThumbRating(true)
+            val r = when (c.ratingType) {
+                Rating.RATING_HEART -> Rating.newHeartRating(true)
+                Rating.RATING_THUMB_UP_DOWN -> Rating.newThumbRating(true)
+                Rating.RATING_3_STARS -> Rating.newStarRating(Rating.RATING_3_STARS, 3f)
+                Rating.RATING_4_STARS -> Rating.newStarRating(Rating.RATING_4_STARS, 4f)
+                else -> Rating.newStarRating(Rating.RATING_5_STARS, 5f)
+            }
             c.transportControls.setRating(r)
             return "ok"
         }

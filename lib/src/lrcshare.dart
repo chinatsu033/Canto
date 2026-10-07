@@ -50,29 +50,28 @@ class LrcShareClient {
   LrcShareClient(this.gate);
   static const _host = 'api.lrcshare.com';
 
+  /// Looser matching: (title, primary artist) -> (cleaned title only) ->
+  /// (keyword = cleaned title). Title must clearly match; artist variants
+  /// (any credited artist) are compared when known. A wrong pick is further
+  /// guarded by timestamp alignment before anything is shown.
   Future<LsSong?> find(String title, String artist) async {
-    final r = await gate.get(Uri.https(_host, '/v1/search', {
-      'title': title,
-      if (artist.isNotEmpty) 'artist': primaryArtist(artist),
-      'type': 'song',
-    }));
-    if (r.statusCode != 200) return null;
-    final items = ((jsonDecode(utf8.decode(r.bodyBytes)) as Map)['data']?['items'] as List?) ?? const [];
-    Map? best;
-    var bestScore = 0.0;
-    for (final it in items.whereType<Map>()) {
-      final names = [for (final a in (it['artists'] as List? ?? const []).whereType<Map>()) '${a['name']}'];
-      final t = similarity(title, '${it['title']}');
-      final a = artist.isEmpty ? .5 : names.map((n) => similarity(primaryArtist(artist), n)).fold(0.0, (x, y) => x > y ? x : y);
-      final s = t * .65 + a * .35;
-      if (!confidentMatch(t, a, artist.isNotEmpty)) continue;
-      if (s > bestScore) {
-        bestScore = s;
-        best = it;
-      }
+    final cleaned = cleanTitle(title);
+    final queries = <Map<String, String>>[
+      {'title': title, if (artist.isNotEmpty) 'artist': primaryArtist(artist), 'type': 'song'},
+      if (cleaned.isNotEmpty) {'title': cleaned, 'type': 'song'},
+      if (cleaned.isNotEmpty) {'keyword': cleaned, 'type': 'song'},
+    ];
+    final seen = <String>{};
+    for (final q in queries) {
+      final k = q.toString();
+      if (!seen.add(k)) continue;
+      final r = await gate.get(Uri.https(_host, '/v1/search', q));
+      if (r.statusCode != 200) continue;
+      final items = ((jsonDecode(utf8.decode(r.bodyBytes)) as Map)['data']?['items'] as List?) ?? const [];
+      final best = pickLsMatch(items.whereType<Map>().toList(), title, artist);
+      if (best != null) return best;
     }
-    if (best == null) return null;
-    return LsSong('${best['id']}', (best['album'] as Map?)?['cover'] as String?);
+    return null;
   }
 
   Future<List<LsVersion>> versions(String id) async {
@@ -84,6 +83,43 @@ class LrcShareClient {
     if (r.statusCode != 200) return const [];
     return parseLsVersions(jsonDecode(utf8.decode(r.bodyBytes)) as Map<String, dynamic>);
   }
+}
+
+/// Best search item: title similarity ≥0.75 (raw or cleaned), and if the
+/// artist is known, any credited artist (or artist variant) ≥0.5.
+LsSong? pickLsMatch(List<Map> items, String title, String artist) {
+  final variants = artistVariants(artist);
+  Map? best;
+  var bestScore = 0.0;
+  for (final it in items) {
+    final names = [for (final a in (it['artists'] as List? ?? const []).whereType<Map>()) '${a['name']}'];
+    final t = similarity(title, '${it['title']}');
+    var a = 0.0;
+    for (final v in variants) {
+      for (final n in names) {
+        final x = similarity(v, n);
+        if (x > a) a = x;
+      }
+    }
+    if (!confidentMatch(t, a, variants.isNotEmpty)) continue;
+    final s = t * .65 + a * .35;
+    if (s > bestScore) {
+      bestScore = s;
+      best = it;
+    }
+  }
+  if (best == null) return null;
+  return LsSong('${best['id']}', (best['album'] as Map?)?['cover'] as String?);
+}
+
+/// "A, B & C feat. D" -> [A, B, C, D] (plus the full string).
+List<String> artistVariants(String artist) {
+  if (artist.trim().isEmpty) return const [];
+  final parts = artist
+      .split(RegExp(r'\s*(,|&|、|/|;|，| x | X | feat\.? | ft\.? | and | with )\s*', caseSensitive: false))
+      .map((e) => e.trim())
+      .where((e) => e.isNotEmpty);
+  return {artist.trim(), ...parts}.toList();
 }
 
 /// Everything LrcShare knows about the current track (memory only).

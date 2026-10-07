@@ -1,6 +1,6 @@
 Canto preview — personal learning project, non-profit. Does not provide music. Lyrics from LRCLIB / LrcAPI / LrcShare; copyright belongs to rights holders.
 
-What's new in 0.1.1: larger rounded corners, Apple Music-like line transitions, draggable seek bar + double-tap a line to seek, tap queue items to switch (Android/Linux), LrcAPI and LrcShare fallback sources, optional translation / romanization (LrcShare), 纯音乐 state.
+What's new in 0.1.2-preview: translation/romanization toggles always tappable with "no data" hints; local "auto" romanization (pinyin / kana romaji / Korean RR); looser LrcShare matching; Android favorite detection widened (custom actions + any rating; long-press to inspect); queue switching with Next/Previous stepping fallback (Android, Linux); capsule play button; source platform name under the artist; 19 UI languages incl. Arabic RTL with an in-app picker.
 
 | File | Platform |
 |---|---|

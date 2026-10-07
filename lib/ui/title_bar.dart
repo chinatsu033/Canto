@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 import '../l10n/gen/app_localizations.dart';
 import '../src/theme.dart';
+import '../src/controller.dart';
+import 'language.dart';
 
 /// Frameless desktop title bar: drag area, always-on-top, minimize, close.
 class DesktopTitleBar extends StatefulWidget {
-  const DesktopTitleBar({super.key});
+  final CantoController controller;
+  const DesktopTitleBar({super.key, required this.controller});
   @override
   State<DesktopTitleBar> createState() => _DesktopTitleBarState();
 }
@@ -45,13 +48,14 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
         Expanded(
           child: DragToMoveArea(
             child: Container(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               padding: const EdgeInsets.only(left: 14),
               child: Text(l.appTitle,
                   style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: cs.onSurfaceVariant)),
             ),
           ),
         ),
+        btn(Icons.translate, l.language, () => showLanguagePicker(context, widget.controller)),
         btn(_pinned ? Icons.push_pin : Icons.push_pin_outlined, l.alwaysOnTop, () async {
           final v = !_pinned;
           await windowManager.setAlwaysOnTop(v);

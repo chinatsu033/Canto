@@ -23,13 +23,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadingLyrics => 'Looking up lyrics…';
 
   @override
-  String get noLyrics => 'No lyrics found';
+  String get noLyrics => 'No lyrics yet';
 
   @override
   String get plainLyricsNote => 'Unsynced lyrics (no timing)';
 
   @override
-  String get lyricsError => 'Could not reach LRCLIB';
+  String get lyricsError => 'Couldn\'t reach the lyrics services';
 
   @override
   String get retry => 'Retry';
@@ -109,4 +109,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get romanization => 'Romanization';
+
+  @override
+  String get noTranslationHint => 'No translation for this song yet';
+
+  @override
+  String get noRomanizationHint => 'No romanization for this song yet';
+
+  @override
+  String get autoLabel => 'auto';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get followSystem => 'Follow system';
+
+  @override
+  String get playerActions => 'Player actions';
+
+  @override
+  String get playerActionsNone => 'This player exposes no extra actions';
 }

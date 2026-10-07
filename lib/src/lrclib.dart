@@ -5,7 +5,7 @@ import 'models.dart';
 import 'net.dart';
 import 'lrcapi.dart' show similarity, confidentMatch;
 
-const userAgent = 'Canto/0.1.1 (https://github.com/chinatsu033/Canto)';
+const userAgent = 'Canto/0.1.2 (https://github.com/chinatsu033/Canto)';
 
 sealed class LyricsResult {
   const LyricsResult();

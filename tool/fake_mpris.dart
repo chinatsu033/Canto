@@ -2,11 +2,16 @@
 // Dev helper: exposes a fake MPRIS player with placeholder metadata so the
 // Linux build can be smoke-tested without a real player. No audio involved.
 // Run: dart run tool/fake_mpris.dart
+import 'dart:io';
 import 'package:dbus/dbus.dart';
+
+final _env = Platform.environment;
 
 class FakePlayer extends DBusObject {
   FakePlayer() : super(DBusObjectPath('/org/mpris/MediaPlayer2'));
   bool playing = true;
+  int current = 1; // index into tracks 1..3
+  final ignoreGoTo = _env['FAKE_IGNORE_GOTO'] == '1';
   final started = DateTime.now();
 
   Map<String, DBusValue> get _player => {
@@ -16,12 +21,14 @@ class FakePlayer extends DBusObject {
         'CanPlay': const DBusBoolean(true),
         'CanPause': const DBusBoolean(true),
         'CanSeek': const DBusBoolean(true),
+        'CanGoNext': const DBusBoolean(true),
+        'CanGoPrevious': const DBusBoolean(true),
         'Metadata': DBusDict.stringVariant({
-          'mpris:trackid': DBusObjectPath('/canto/track/1'),
-          'xesam:title': const DBusString('Canto Placeholder Track'),
-          'xesam:artist': DBusArray.string(['Nobody In Particular']),
-          'xesam:album': const DBusString('Test Album'),
-          'mpris:length': const DBusInt64(180000000),
+          'mpris:trackid': DBusObjectPath('/canto/track/$current'),
+          'xesam:title': DBusString(current == 1 ? (_env['FAKE_TITLE'] ?? 'Canto Placeholder Track') : 'Placeholder $current'),
+          'xesam:artist': DBusArray.string([_env['FAKE_ARTIST'] ?? 'Nobody In Particular']),
+          'xesam:album': DBusString(_env['FAKE_ALBUM'] ?? 'Test Album'),
+          'mpris:length': DBusInt64(int.parse(_env['FAKE_LEN_S'] ?? '180') * 1000000),
         }),
       };
   Map<String, DBusValue> get _root => {
@@ -34,7 +41,7 @@ class FakePlayer extends DBusObject {
     if (interface == 'org.mpris.MediaPlayer2.Player') return DBusGetAllPropertiesResponse(_player);
     if (interface == 'org.mpris.MediaPlayer2') return DBusGetAllPropertiesResponse(_root);
     if (interface == 'org.mpris.MediaPlayer2.TrackList') {
-      return DBusGetAllPropertiesResponse({'Tracks': DBusArray.objectPath([DBusObjectPath('/canto/track/1'), DBusObjectPath('/canto/track/2')])});
+      return DBusGetAllPropertiesResponse({'Tracks': DBusArray.objectPath([for (var i = 1; i <= 3; i++) DBusObjectPath('/canto/track/$i')])});
     }
     return DBusMethodErrorResponse.unknownInterface();
   }
@@ -56,15 +63,25 @@ class FakePlayer extends DBusObject {
       print('PlayPause -> playing=$playing');
       return DBusMethodSuccessResponse();
     }
-    if (call.name == 'SetPosition' || call.name == 'GoTo') {
+    if (call.name == 'SetPosition') {
       print('${call.name} ${call.values.map((v) => v.toNative()).join(' ')}');
+      return DBusMethodSuccessResponse();
+    }
+    if (call.name == 'GoTo') {
+      print('GoTo ${(call.values.first as DBusObjectPath).value}${ignoreGoTo ? ' (ignored)' : ''}');
+      if (!ignoreGoTo) current = int.parse((call.values.first as DBusObjectPath).value.split('/').last);
+      return DBusMethodSuccessResponse();
+    }
+    if (call.name == 'Next' || call.name == 'Previous') {
+      current = (current + (call.name == 'Next' ? 1 : -1)).clamp(1, 3);
+      print('${call.name} -> track $current');
       return DBusMethodSuccessResponse();
     }
     if (call.name == 'GetTracksMetadata') {
       return DBusMethodSuccessResponse([
         DBusArray(DBusSignature('a{sv}'), [
-          DBusDict.stringVariant({'mpris:trackid': DBusObjectPath('/canto/track/1'), 'xesam:title': const DBusString('Canto Placeholder Track')}),
-          DBusDict.stringVariant({'mpris:trackid': DBusObjectPath('/canto/track/2'), 'xesam:title': const DBusString('Second Placeholder')}),
+          for (var i = 1; i <= 3; i++)
+            DBusDict.stringVariant({'mpris:trackid': DBusObjectPath('/canto/track/$i'), 'xesam:title': DBusString('Placeholder $i')}),
         ])
       ]);
     }

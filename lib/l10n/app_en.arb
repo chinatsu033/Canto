@@ -4,21 +4,14 @@
   "nothingPlaying": "Nothing is playing",
   "nothingPlayingHint": "Play something in any music app. Canto only reads the system's now-playing info.",
   "loadingLyrics": "Looking up lyrics…",
-  "noLyrics": "No lyrics found",
+  "noLyrics": "No lyrics yet",
   "plainLyricsNote": "Unsynced lyrics (no timing)",
-  "lyricsError": "Could not reach LRCLIB",
+  "lyricsError": "Couldn't reach the lyrics services",
   "retry": "Retry",
   "play": "Play",
   "pause": "Pause",
   "favorite": "Favorite",
   "favoriteSent": "Sent to {app}",
-  "@favoriteSent": {
-    "placeholders": {
-      "app": {
-        "type": "String"
-      }
-    }
-  },
   "favoriteUnsupported": "This player doesn't let other apps favorite tracks",
   "favoriteFailed": "The player rejected the request",
   "controlUnsupported": "This player doesn't accept remote control",
@@ -35,14 +28,28 @@
   "lyricsFrom": "Lyrics from {source}",
   "seekUnsupported": "This player doesn't allow seeking",
   "commandFailed": "The player didn't accept the request",
+  "instrumental": "Instrumental",
+  "translation": "Translation",
+  "romanization": "Romanization",
+  "noTranslationHint": "No translation for this song yet",
+  "noRomanizationHint": "No romanization for this song yet",
+  "autoLabel": "auto",
+  "language": "Language",
+  "followSystem": "Follow system",
+  "playerActions": "Player actions",
+  "playerActionsNone": "This player exposes no extra actions",
+  "@favoriteSent": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
   "@lyricsFrom": {
     "placeholders": {
       "source": {
         "type": "String"
       }
     }
-  },
-  "instrumental": "Instrumental",
-  "translation": "Translation",
-  "romanization": "Romanization"
+  }
 }

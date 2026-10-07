@@ -17,19 +17,19 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get nothingPlayingHint =>
-      '任意の音楽アプリで再生してください。Canto はシステムの再生中情報を読み取るだけです。';
+      '音楽アプリで何か再生してください。Canto はシステムの再生中情報を読み取るだけです。';
 
   @override
   String get loadingLyrics => '歌詞を検索中…';
 
   @override
-  String get noLyrics => '歌詞が見つかりません';
+  String get noLyrics => '歌詞はまだありません';
 
   @override
   String get plainLyricsNote => '同期なしの歌詞（タイミングなし）';
 
   @override
-  String get lyricsError => 'LRCLIB に接続できません';
+  String get lyricsError => '歌詞サービスに接続できません';
 
   @override
   String get retry => '再試行';
@@ -49,7 +49,7 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get favoriteUnsupported => 'このプレーヤーは外部からのお気に入り登録に対応していません';
+  String get favoriteUnsupported => 'このプレーヤーは他のアプリからのお気に入り登録に対応していません';
 
   @override
   String get favoriteFailed => 'プレーヤーがリクエストを拒否しました';
@@ -107,4 +107,25 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get romanization => 'ローマ字';
+
+  @override
+  String get noTranslationHint => 'この曲の翻訳はまだありません';
+
+  @override
+  String get noRomanizationHint => 'この曲のローマ字はまだありません';
+
+  @override
+  String get autoLabel => '自動';
+
+  @override
+  String get language => '言語';
+
+  @override
+  String get followSystem => 'システムに従う';
+
+  @override
+  String get playerActions => 'プレーヤーの操作';
+
+  @override
+  String get playerActionsNone => 'このプレーヤーには追加の操作がありません';
 }

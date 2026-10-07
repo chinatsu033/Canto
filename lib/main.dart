@@ -8,6 +8,7 @@ import 'src/source.dart';
 import 'src/theme.dart';
 import 'ui/player_page.dart';
 import 'ui/title_bar.dart';
+import 'ui/language.dart';
 
 bool get isDesktop => !kIsWeb && (Platform.isLinux || Platform.isMacOS || Platform.isWindows);
 
@@ -34,12 +35,29 @@ Future<void> main() async {
   runApp(CantoApp(controller: controller, desktop: isDesktop));
 }
 
-const supportedLocales = [
-  Locale('zh'),
-  Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
-  Locale('ja'),
-  Locale('en'),
-];
+const supportedLocales = AppLocalizations.supportedLocales;
+
+Locale localeFromTag(String tag) {
+  final p = tag.split('_');
+  if (p.length == 3) return Locale.fromSubtags(languageCode: p[0], scriptCode: p[1], countryCode: p[2]);
+  if (p.length == 2) return Locale.fromSubtags(languageCode: p[0], scriptCode: p[1]);
+  return Locale(p[0]);
+}
+
+/// System locale -> one of our locales (Simplified Chinese is the default).
+Locale resolveLocale(List<Locale>? locales) {
+  for (final l in locales ?? const <Locale>[]) {
+    if (l.languageCode == 'zh') {
+      if (l.countryCode == 'HK' || l.countryCode == 'MO') return localeFromTag('zh_Hant_HK');
+      if (l.scriptCode == 'Hant' || l.countryCode == 'TW') return localeFromTag('zh_Hant');
+      return const Locale('zh');
+    }
+    for (final s in supportedLocales) {
+      if (s.languageCode == l.languageCode && s.scriptCode == null && s.countryCode == null) return s;
+    }
+  }
+  return const Locale('zh');
+}
 
 class CantoApp extends StatelessWidget {
   final CantoController controller;
@@ -66,24 +84,17 @@ class CantoApp extends StatelessWidget {
         theme: buildTheme(Brightness.light, controller.accent),
         darkTheme: buildTheme(Brightness.dark, controller.accent),
         themeMode: themeMode,
-        locale: locale,
+        locale: locale ?? (controller.localeTag == null ? null : localeFromTag(controller.localeTag!)),
         supportedLocales: supportedLocales,
         localizationsDelegates: AppLocalizations.localizationsDelegates,
-        localeListResolutionCallback: (locales, supported) {
-          for (final l in locales ?? const <Locale>[]) {
-            if (l.languageCode == 'zh') {
-              final hant = l.scriptCode == 'Hant' || const ['TW', 'HK', 'MO'].contains(l.countryCode);
-              return hant ? supportedLocales[1] : supportedLocales[0];
-            }
-            if (l.languageCode == 'ja') return supportedLocales[2];
-            if (l.languageCode == 'en') return supportedLocales[3];
-          }
-          return supportedLocales[0]; // Simplified Chinese is the default
-        },
+        localeListResolutionCallback: (locales, supported) => resolveLocale(locales),
         home: Scaffold(
           body: SafeArea(
             child: Column(children: [
-              if (desktop) const DesktopTitleBar(),
+              if (desktop)
+                DesktopTitleBar(controller: controller)
+              else
+                Align(alignment: AlignmentDirectional.centerEnd, child: LanguageButton(controller: controller)),
               Expanded(child: PlayerPage(controller: controller, showLyricsView: initialLyricsView)),
             ]),
           ),

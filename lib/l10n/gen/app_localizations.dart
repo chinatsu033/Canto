@@ -5,8 +5,22 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:intl/intl.dart' as intl;
 
+import 'app_localizations_ar.dart';
+import 'app_localizations_de.dart';
 import 'app_localizations_en.dart';
+import 'app_localizations_es.dart';
+import 'app_localizations_fr.dart';
+import 'app_localizations_hi.dart';
+import 'app_localizations_id.dart';
+import 'app_localizations_it.dart';
 import 'app_localizations_ja.dart';
+import 'app_localizations_ko.dart';
+import 'app_localizations_ms.dart';
+import 'app_localizations_pt.dart';
+import 'app_localizations_ru.dart';
+import 'app_localizations_th.dart';
+import 'app_localizations_tr.dart';
+import 'app_localizations_vi.dart';
 import 'app_localizations_zh.dart';
 
 // ignore_for_file: type=lint
@@ -95,10 +109,29 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
+    Locale('ar'),
+    Locale('de'),
     Locale('en'),
+    Locale('es'),
+    Locale('fr'),
+    Locale('hi'),
+    Locale('id'),
+    Locale('it'),
     Locale('ja'),
+    Locale('ko'),
+    Locale('ms'),
+    Locale('pt'),
+    Locale('ru'),
+    Locale('th'),
+    Locale('tr'),
+    Locale('vi'),
     Locale('zh'),
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+    Locale.fromSubtags(
+      languageCode: 'zh',
+      countryCode: 'HK',
+      scriptCode: 'Hant',
+    ),
   ];
 
   /// No description provided for @appTitle.
@@ -128,7 +161,7 @@ abstract class AppLocalizations {
   /// No description provided for @noLyrics.
   ///
   /// In en, this message translates to:
-  /// **'No lyrics found'**
+  /// **'No lyrics yet'**
   String get noLyrics;
 
   /// No description provided for @plainLyricsNote.
@@ -140,7 +173,7 @@ abstract class AppLocalizations {
   /// No description provided for @lyricsError.
   ///
   /// In en, this message translates to:
-  /// **'Could not reach LRCLIB'**
+  /// **'Couldn\'t reach the lyrics services'**
   String get lyricsError;
 
   /// No description provided for @retry.
@@ -286,6 +319,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Romanization'**
   String get romanization;
+
+  /// No description provided for @noTranslationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No translation for this song yet'**
+  String get noTranslationHint;
+
+  /// No description provided for @noRomanizationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'No romanization for this song yet'**
+  String get noRomanizationHint;
+
+  /// No description provided for @autoLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'auto'**
+  String get autoLabel;
+
+  /// No description provided for @language.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// No description provided for @followSystem.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow system'**
+  String get followSystem;
+
+  /// No description provided for @playerActions.
+  ///
+  /// In en, this message translates to:
+  /// **'Player actions'**
+  String get playerActions;
+
+  /// No description provided for @playerActionsNone.
+  ///
+  /// In en, this message translates to:
+  /// **'This player exposes no extra actions'**
+  String get playerActionsNone;
 }
 
 class _AppLocalizationsDelegate
@@ -298,14 +373,37 @@ class _AppLocalizationsDelegate
   }
 
   @override
-  bool isSupported(Locale locale) =>
-      <String>['en', 'ja', 'zh'].contains(locale.languageCode);
+  bool isSupported(Locale locale) => <String>[
+    'ar',
+    'de',
+    'en',
+    'es',
+    'fr',
+    'hi',
+    'id',
+    'it',
+    'ja',
+    'ko',
+    'ms',
+    'pt',
+    'ru',
+    'th',
+    'tr',
+    'vi',
+    'zh',
+  ].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
+  // Lookup logic when language+script+country codes are specified.
+  switch (locale.toString()) {
+    case 'zh_Hant_HK':
+      return AppLocalizationsZhHantHk();
+  }
+
   // Lookup logic when language+script codes are specified.
   switch (locale.languageCode) {
     case 'zh':
@@ -320,10 +418,38 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
 
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
+    case 'ar':
+      return AppLocalizationsAr();
+    case 'de':
+      return AppLocalizationsDe();
     case 'en':
       return AppLocalizationsEn();
+    case 'es':
+      return AppLocalizationsEs();
+    case 'fr':
+      return AppLocalizationsFr();
+    case 'hi':
+      return AppLocalizationsHi();
+    case 'id':
+      return AppLocalizationsId();
+    case 'it':
+      return AppLocalizationsIt();
     case 'ja':
       return AppLocalizationsJa();
+    case 'ko':
+      return AppLocalizationsKo();
+    case 'ms':
+      return AppLocalizationsMs();
+    case 'pt':
+      return AppLocalizationsPt();
+    case 'ru':
+      return AppLocalizationsRu();
+    case 'th':
+      return AppLocalizationsTh();
+    case 'tr':
+      return AppLocalizationsTr();
+    case 'vi':
+      return AppLocalizationsVi();
     case 'zh':
       return AppLocalizationsZh();
   }

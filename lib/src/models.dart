@@ -28,6 +28,7 @@ class NowPlaying {
   final bool canSeek;
   final bool canGoToQueueItem;
   final List<QueueItem>? queue; // null => player doesn't expose a queue
+  final List<String> playerActions; // diagnostic: custom actions the session exposes
 
   const NowPlaying({
     required this.title,
@@ -46,13 +47,14 @@ class NowPlaying {
     this.canSeek = false,
     this.canGoToQueueItem = false,
     this.queue,
+    this.playerActions = const [],
   });
 
   NowPlaying withPosition(Duration p) => NowPlaying(
         title: title, artist: artist, album: album, duration: duration, position: p,
         positionAt: DateTime.now(), playing: playing, rate: rate, artwork: artwork,
         sourceApp: sourceApp, sourceName: sourceName, canPlayPause: canPlayPause,
-        canFavorite: canFavorite, canSeek: canSeek, canGoToQueueItem: canGoToQueueItem, queue: queue);
+        canFavorite: canFavorite, canSeek: canSeek, canGoToQueueItem: canGoToQueueItem, queue: queue, playerActions: playerActions);
 
   String get trackKey => '$sourceApp|$title|$artist|$album';
 
@@ -81,6 +83,7 @@ class NowPlaying {
       canFavorite: m['canFavorite'] == true,
       canSeek: m['canSeek'] == true,
       canGoToQueueItem: m['canGoToQueueItem'] == true,
+      playerActions: [for (final a in (m['customActions'] as List? ?? const [])) '$a'],
       queue: q == null
           ? null
           : [

@@ -6,7 +6,7 @@
   "loadingLyrics": "正在查找歌词…",
   "noLyrics": "暂无歌词",
   "plainLyricsNote": "非同步歌词（无时间轴）",
-  "lyricsError": "无法连接 LRCLIB",
+  "lyricsError": "无法连接歌词服务",
   "retry": "重试",
   "play": "播放",
   "pause": "暂停",
@@ -30,5 +30,12 @@
   "commandFailed": "播放器未接受该操作",
   "instrumental": "纯音乐",
   "translation": "翻译",
-  "romanization": "罗马音"
+  "romanization": "罗马音",
+  "noTranslationHint": "此歌暂无翻译",
+  "noRomanizationHint": "此歌暂无罗马音",
+  "autoLabel": "自动",
+  "language": "语言",
+  "followSystem": "跟随系统",
+  "playerActions": "播放器操作",
+  "playerActionsNone": "该播放器没有提供额外操作"
 }

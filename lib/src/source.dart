@@ -11,7 +11,9 @@ abstract class NowPlayingSource {
   Future<CommandResult> playPause();
   Future<CommandResult> favorite();
   Future<CommandResult> seek(Duration position) async => CommandResult.unsupported;
-  Future<CommandResult> goToQueueItem(String id) async => CommandResult.unsupported;
+  /// Switch to queue item [id]; [offset] = target index - current index, used
+  /// for the Next/Previous stepping fallback when the player ignores the id.
+  Future<CommandResult> goToQueueItem(String id, int offset) async => CommandResult.unsupported;
   Future<bool> hasPermission() async => true;
   Future<void> requestPermission() async {}
   void dispose() {}
@@ -58,7 +60,7 @@ class ChannelSource extends NowPlayingSource {
   @override
   Future<CommandResult> seek(Duration position) => _cmd('seek', {'positionMs': position.inMilliseconds});
   @override
-  Future<CommandResult> goToQueueItem(String id) => _cmd('goToQueueItem', {'id': id});
+  Future<CommandResult> goToQueueItem(String id, int offset) => _cmd('goToQueueItem', {'id': id, 'offset': offset});
 
   @override
   Future<bool> hasPermission() async {

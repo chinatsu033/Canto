@@ -26,9 +26,9 @@ Canto 是一个**个人学习项目，非营利**。它读取系统的“正在�
 3. **[LrcShare](https://lrcshare.com)**（小众人工整理曲库，含译文/罗马音/封面）：`/v1/search` → `/v1/lyric/:id?lyric_lines=1`。请求间隔 ≥300ms，不加防缓存参数。
 4. 都没有 → “暂无歌词”。绝不编造歌词。歌词视图底部显示实际来源（LRCLIB / LrcAPI / LrcShare）。
 
-所有请求带标识 User-Agent `Canto/0.1.1 (https://github.com/chinatsu033/Canto)`（同时附 `X-User-Agent`）；遇到 HTTP 429 指数退避（1s、2s，或遵循 Retry-After），不立即重试，多次失败后该来源暂停。
+所有请求带标识 User-Agent `Canto/0.1.2 (https://github.com/chinatsu033/Canto)`（同时附 `X-User-Agent`）；遇到 HTTP 429 指数退避（1s、2s，或遵循 Retry-After），不立即重试，多次失败后该来源暂停。
 
-**翻译 / 罗马音**：仅来自 LrcShare（即使歌词来自 LRCLIB/LrcAPI，也会每首歌额外请求一次 LrcShare）。按时间戳对齐到当前显示的原文行，沿用原文时间戳，不重新计时；无法对齐或没有对应版本时开关变灰。译文优先简体中文（原文是中文时用英文）；罗马音：日语 ja-Latn、韩语 ko-Latn、中文 zh-Latn-pinyin（无则粤拼 jyutping）。两个开关默认关闭，可同时开启，设置会保存。
+**翻译 / 罗马音**：仅来自 LrcShare（即使歌词来自 LRCLIB/LrcAPI，也会每首歌额外请求一次 LrcShare）。按时间戳对齐到当前显示的原文行，沿用原文时间戳，不重新计时；无法对齐或没有对应版本时：罗马音回退到本地“自动”生成，翻译显示提示。译文优先简体中文（原文是中文时用英文）；罗马音：日语 ja-Latn、韩语 ko-Latn、中文 zh-Latn-pinyin（无则粤拼 jyutping）。两个开关默认关闭，可同时开启，设置会保存。
 **封面强调色**：优先用系统会话的封面；没有封面时才用 LrcShare 的封面（仅本次播放、仅内存）。
 
 感谢 LRCLIB、LrcAPI、LrcShare 提供免费服务。
@@ -38,9 +38,14 @@ Canto 是一个**个人学习项目，非营利**。它读取系统的“正在�
 - 播放页：封面居中，下方只显示当前一句（和下一句）；点击歌词进入大字歌词视图，可滚动查看其他行，自动跟随当前行，手动滚动 4 秒后恢复跟随。
 - 底部控制栏：播放/暂停、收藏。收藏图标随来源 App 变化：Spotify 为 ➕，QQ音乐/网易云/酷狗/酷我等国内 App 为 ♥，Apple Music 为 ☆。**只有当系统会话真的支持收藏时才会执行**，否则提示“不支持”，不会假装成功。
 - 播放队列：仅当播放器公开了队列时显示（Android `MediaController.getQueue`、Linux MPRIS TrackList），否则完全不显示列表。
-- 强调色取自当前封面的主色，每首歌更新；无封面时使用固定的中性蓝色。浅色模式白底，深色模式灰黑（#1F1F1F / #2A2A2A），跟随系统。所有按钮均为圆角方形。
+- 强调色取自当前封面的主色，每首歌更新；无封面时使用固定的中性蓝色。浅色模式白底，深色模式灰黑（#1F1F1F / #2A2A2A），跟随系统。按钮为圆角方形，播放/暂停为胶囊形。
 - 桌面端：约 380×720 的竖屏小窗，默认置顶（可切换），无边框，自带拖动区、最小化与关闭按钮，实色背景。
-- 语言：简体中文（默认）、繁體中文、日本語、English。
+- 翻译/罗马音开关始终可点：没有可用数据时提示“此歌暂无翻译/罗马音”。不使用任何机器翻译服务。
+- **本地罗马音（标记“自动”）**：LrcShare 没有罗马音时，在本机生成：中文 → 拼音（lpinyin）、日文假名 → 罗马字（含汉字的行跳过，不猜读音）、韩文 → 文化观光部式（Revised Romanization）。时间戳不变。
+- 歌手下方显示来源平台名（Spotify、Apple Music、QQ音乐、网易云音乐、酷狗音乐、酷我音乐、YouTube Music 等），未知时显示 App 名。
+- 队列切换：Android 先 `skipToQueueItem(queueId)`，1.2 秒后若当前曲目未变，则按位置差连续“下一首/上一首”；Linux 先 MPRIS `TrackList.GoTo`，未生效则同样逐首跳。当前项高亮并在切换后刷新。
+- 收藏（Android）：匹配播放器 custom action（like/favorite/收藏/喜欢/加入… 等）或任意类型 rating（心形/赞/星级）。各 App 实际行为取决于其媒体会话：Spotify、网易云、QQ音乐一般提供 custom action；未提供时提示不支持。长按收藏按钮可查看当前播放器暴露的动作，便于排查。
+- 语言：简体中文、繁體中文（台灣/香港）、English、日本語、한국어、Français、Deutsch、Español、Português (Brasil)、Italiano、Русский、العربية（RTL）、ไทย、Tiếng Việt、Bahasa Indonesia、Bahasa Melayu、Türkçe、हिन्दी。标题栏的语言按钮可选择，默认“跟随系统”。CI 检查所有语言 100% key 覆盖。
 
 ### 各平台“正在播放”来源与限制
 | 平台 | 来源 | 说明 |
@@ -69,9 +74,9 @@ Canto is a **personal learning project, non-profit**. It reads your system's now
 3. **[LrcShare](https://lrcshare.com)** (small curated catalog with translation/romanization/cover): `/v1/search` → `/v1/lyric/:id?lyric_lines=1`, ≥300 ms between requests, no cache-busting parameters.
 4. Otherwise "No lyrics". Lyrics are never fabricated. The lyrics view shows the actual source (LRCLIB / LrcAPI / LrcShare).
 
-Every request sends the User-Agent `Canto/0.1.1 (https://github.com/chinatsu033/Canto)` (plus `X-User-Agent`). HTTP 429 triggers exponential backoff (1 s, 2 s, or Retry-After), never an immediate retry; repeated 429s pause that source.
+Every request sends the User-Agent `Canto/0.1.2 (https://github.com/chinatsu033/Canto)` (plus `X-User-Agent`). HTTP 429 triggers exponential backoff (1 s, 2 s, or Retry-After), never an immediate retry; repeated 429s pause that source.
 
-**Translation / romanization** come only from LrcShare (one extra LrcShare lookup per track, even when lyrics came from LRCLIB/LrcAPI). They are aligned to the displayed lines by timestamp and reuse the original timestamps (no re-timing); if no version exists or alignment fails, the toggle is greyed out. Translation prefers Simplified Chinese (English if the original is Chinese); romanization uses ja-Latn / ko-Latn / zh-Latn-pinyin (jyutping as fallback). Both toggles default off, can be combined, and are remembered.
+**Translation / romanization** come only from LrcShare (one extra LrcShare lookup per track, even when lyrics came from LRCLIB/LrcAPI). They are aligned to the displayed lines by timestamp and reuse the original timestamps (no re-timing); if no version exists or alignment fails, romanization falls back to local "auto" generation and translation shows a hint. Translation prefers Simplified Chinese (English if the original is Chinese); romanization uses ja-Latn / ko-Latn / zh-Latn-pinyin (jyutping as fallback). Both toggles default off, can be combined, and are remembered.
 **Accent color** uses the system session artwork; only if there is none, the LrcShare cover (this playback only, memory only).
 
 Thanks to LRCLIB, LrcAPI and LrcShare for their free services.
@@ -81,9 +86,14 @@ Thanks to LRCLIB, LrcAPI and LrcShare for their free services.
 - Player page: centered artwork with only the current (and next) line below; tap to open the enlarged lyrics view, which auto-follows the current line and resumes 4 s after manual scrolling.
 - Bottom bar: play/pause and favorite. Favorite icon depends on the source app: Spotify = plus, mainland-China apps (QQ Music, NetEase, Kugou, Kuwo…) = heart, Apple Music = star. **Favorite is only sent when the system session supports it**; otherwise a toast says it's unsupported — it never pretends to succeed.
 - Queue: shown only when the player exposes one (Android `getQueue`, MPRIS TrackList); otherwise no list at all.
-- Accent color is extracted from the album artwork per track, with a fixed neutral fallback. Light mode is white; dark mode is grey (#1F1F1F / #2A2A2A); follows the system. All controls are rounded squares.
+- Accent color is extracted from the album artwork per track, with a fixed neutral fallback. Light mode is white; dark mode is grey (#1F1F1F / #2A2A2A); follows the system. Controls are rounded squares; play/pause is a capsule.
 - Desktop: ~380×720 portrait window, always-on-top by default (toggle), frameless with drag area, minimize and close, solid background.
-- Languages: Simplified Chinese (default), Traditional Chinese, Japanese, English.
+- Translation/romanization toggles are always tappable; with no data they show "No translation/romanization for this song". No machine-translation service is used.
+- **Local romanization (labelled "auto")** when LrcShare has none: Chinese → pinyin (lpinyin), Japanese kana → romaji (lines containing kanji are skipped rather than guessed), Korean → Revised Romanization. Timestamps unchanged.
+- The source platform (Spotify, Apple Music, QQ音乐, 网易云音乐, 酷狗音乐, 酷我音乐, YouTube Music…) is shown under the artist, falling back to the app name.
+- Queue switching: Android tries `skipToQueueItem(queueId)`; if the track hasn't changed after 1.2 s it steps Next/Previous by the offset. Linux tries MPRIS `TrackList.GoTo`, then the same stepping fallback. The current item is highlighted and refreshes after switching.
+- Favorite (Android): matches player custom actions (like/favorite/收藏/喜欢/add…) or any rating type (heart/thumb/stars). Actual per-app behaviour depends on the app's media session (Spotify, NetEase and QQ Music usually expose a custom action); otherwise a toast says unsupported. Long-press the favorite button to list the actions the player exposes.
+- Languages: zh-Hans, zh-Hant (TW/HK), en, ja, ko, fr, de, es, pt-BR, it, ru, ar (RTL), th, vi, id, ms, tr, hi — pick in the title-bar language menu (default: follow system). CI enforces 100% key coverage.
 
 ### Now-playing sources & limitations
 | Platform | Source | Notes |

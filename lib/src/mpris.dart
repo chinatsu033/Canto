@@ -74,7 +74,7 @@ class MprisSource extends NowPlayingSource {
         canPlayPause: props['CanPause']?.toNative() != false || props['CanPlay']?.toNative() != false,
         canFavorite: false, // MPRIS has no standard favorite/rating command
         canSeek: props['CanSeek']?.toNative() == true && meta['mpris:trackid'] != null,
-        canGoToQueueItem: hasTrackList,
+        canGoToQueueItem: hasTrackList || props['CanGoNext']?.toNative() == true,
         queue: hasTrackList ? await _queue(obj, meta['mpris:trackid']?.toString()) : null,
       );
     } catch (_) {
@@ -149,11 +149,31 @@ class MprisSource extends NowPlayingSource {
   }
 
   @override
-  Future<CommandResult> goToQueueItem(String id) async {
+  Future<CommandResult> goToQueueItem(String id, int offset) async {
     final n = _active;
     if (n == null) return CommandResult.unsupported;
+    final obj = DBusRemoteObject(client, name: n, path: _path);
+    Future<String?> currentId() async {
+      try {
+        final meta = (await obj.getProperty(_player, 'Metadata')).toNative() as Map;
+        return (meta['mpris:trackid'] as DBusObjectPath?)?.value;
+      } catch (_) {
+        return null;
+      }
+    }
+
     try {
-      await DBusRemoteObject(client, name: n, path: _path).callMethod(_tracklist, 'GoTo', [DBusObjectPath(id)]);
+      await obj.callMethod(_tracklist, 'GoTo', [DBusObjectPath(id)]);
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      if (await currentId() == id) return CommandResult.ok;
+    } catch (_) {}
+    // Fallback: step Next/Previous toward the target.
+    if (offset == 0) return CommandResult.failed;
+    try {
+      for (var i = 0; i < offset.abs(); i++) {
+        await obj.callMethod(_player, offset > 0 ? 'Next' : 'Previous', []);
+        await Future<void>.delayed(const Duration(milliseconds: 250));
+      }
       return CommandResult.ok;
     } catch (_) {
       return CommandResult.failed;

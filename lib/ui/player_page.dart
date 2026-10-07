@@ -6,6 +6,7 @@ import '../src/favorite_style.dart';
 import '../src/lrc.dart';
 import '../src/lrclib.dart';
 import '../src/models.dart';
+import '../src/platform_name.dart';
 import '../src/source.dart';
 import '../src/theme.dart';
 
@@ -117,45 +118,53 @@ class _PlayerPageState extends State<PlayerPage> with SingleTickerProviderStateM
     ]);
   }
 
-  void _showQueue(NowPlaying np) {
-    final q = np.queue!;
+  void _showQueue(NowPlaying _) {
     final l = AppLocalizations.of(context);
     showModalBottomSheet<void>(
       context: context,
-      builder: (ctx) {
-        final cs = Theme.of(ctx).colorScheme;
-        return SafeArea(
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
-              child: Text(l.upNext, style: Theme.of(ctx).textTheme.titleMedium),
-            ),
-            Flexible(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: q.length,
-                itemBuilder: (_, i) => ListTile(
-                  dense: true,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(controlRadius)),
-                  // Only tappable where the platform can switch to a queue item.
-                  onTap: np.canGoToQueueItem && q[i].id != null && !q[i].current
-                      ? () async {
-                          Navigator.of(ctx).pop();
-                          final r = await c.source.goToQueueItem(q[i].id!);
-                          if (mounted && r != CommandResult.ok) _toast(l.commandFailed);
-                        }
-                      : null,
-                  title: Text(q[i].title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: q[i].current ? cs.primary : null, fontWeight: q[i].current ? FontWeight.w600 : null)),
-                  subtitle: q[i].artist == null ? null : Text(q[i].artist!, maxLines: 1),
+      // Rebuilds with each poll, so the highlight follows the current item.
+      builder: (ctx) => ListenableBuilder(
+        listenable: c,
+        builder: (ctx, _) {
+          final np = c.nowPlaying;
+          final q = np?.queue ?? const <QueueItem>[];
+          final cur = q.indexWhere((e) => e.current);
+          final cs = Theme.of(ctx).colorScheme;
+          return SafeArea(
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                child: Text(l.upNext, style: Theme.of(ctx).textTheme.titleMedium),
+              ),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: q.length,
+                  itemBuilder: (_, i) => ListTile(
+                    dense: true,
+                    selected: q[i].current,
+                    selectedTileColor: cs.primary.withValues(alpha: .10),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(controlRadius)),
+                    leading: q[i].current ? Icon(Icons.graphic_eq, color: cs.primary, size: 20) : null,
+                    // Only tappable where the platform can switch tracks.
+                    onTap: (np?.canGoToQueueItem ?? false) && q[i].id != null && !q[i].current
+                        ? () async {
+                            final r = await c.source.goToQueueItem(q[i].id!, cur < 0 ? 0 : i - cur);
+                            if (mounted && r != CommandResult.ok) _toast(l.commandFailed);
+                          }
+                        : null,
+                    title: Text(q[i].title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(color: q[i].current ? cs.primary : null, fontWeight: q[i].current ? FontWeight.w600 : null)),
+                    subtitle: q[i].artist == null ? null : Text(q[i].artist!, maxLines: 1),
+                  ),
                 ),
               ),
-            ),
-          ]),
-        );
-      },
+            ]),
+          );
+        },
+      ),
     );
   }
 }
@@ -248,6 +257,13 @@ class _ArtworkAndSegment extends StatelessWidget {
         const SizedBox(height: 2),
         Text([np.artist, np.album].where((s) => s.isNotEmpty).join(' · '),
             maxLines: 1, overflow: TextOverflow.ellipsis, style: tt.bodyMedium?.copyWith(color: cs.onSurfaceVariant)),
+        if (np.sourceApp.isNotEmpty || np.sourceName.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Text(platformName(np.sourceApp, np.sourceName),
+                maxLines: 1, overflow: TextOverflow.ellipsis,
+                style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant.withValues(alpha: .8))),
+          ),
         const SizedBox(height: 14),
         Expanded(
           child: GestureDetector(
@@ -259,7 +275,7 @@ class _ArtworkAndSegment extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(16, 10, 10, 16),
                   child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                    Align(alignment: Alignment.centerRight, child: ExtrasToggles(controller: controller)),
+                    Align(alignment: AlignmentDirectional.centerEnd, child: ExtrasToggles(controller: controller)),
                     Expanded(child: Padding(padding: const EdgeInsets.only(right: 6), child: _segment(context))),
                   ]),
                 ),
@@ -302,7 +318,7 @@ class _ArtworkAndSegment extends StatelessWidget {
               duration: const Duration(milliseconds: 420),
               switchInCurve: Curves.easeOutCubic,
               switchOutCurve: Curves.easeInCubic,
-              layoutBuilder: (cur, prev) => Stack(alignment: Alignment.centerLeft, children: [...prev, ?cur]),
+              layoutBuilder: (cur, prev) => Stack(alignment: AlignmentDirectional.centerStart, children: [...prev, ?cur]),
               transitionBuilder: (child, anim) {
                 final incoming = child.key == key;
                 final slide = Tween<Offset>(begin: incoming ? const Offset(0, .45) : const Offset(0, -.45), end: Offset.zero)
@@ -311,12 +327,12 @@ class _ArtworkAndSegment extends StatelessWidget {
                   opacity: anim,
                   child: SlideTransition(
                     position: slide,
-                    child: ScaleTransition(scale: Tween(begin: .96, end: 1.0).animate(anim), alignment: Alignment.centerLeft, child: child),
+                    child: ScaleTransition(scale: Tween(begin: .96, end: 1.0).animate(anim), alignment: AlignmentDirectional.centerStart.resolve(Directionality.of(context)), child: child),
                   ),
                 );
               },
-              child: Column(
-                key: key,
+              child: SingleChildScrollView(key: key, physics: const NeverScrollableScrollPhysics(), child: Center(widthFactor: 1, child: Column(
+                mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -327,7 +343,7 @@ class _ArtworkAndSegment extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(next, maxLines: 2, overflow: TextOverflow.ellipsis, style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
                 ],
-              ),
+              ))),
             ),
           );
         }(),
@@ -421,7 +437,7 @@ class _LyricsViewState extends State<_LyricsView> {
                 // Cheap emphasis: scale + opacity + colour (no blur).
                 child: AnimatedScale(
                   scale: active ? 1.0 : 0.92,
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart.resolve(Directionality.of(context)),
                   duration: const Duration(milliseconds: 380),
                   curve: Curves.easeOutCubic,
                   child: AnimatedOpacity(
@@ -480,7 +496,13 @@ class _LyricsViewState extends State<_LyricsView> {
       Expanded(child: body),
       Padding(
         padding: const EdgeInsets.only(bottom: 4),
-        child: Text(widget.source == null ? '' : l.lyricsFrom(widget.source!),
+        child: Text(
+            [
+              if (widget.source != null) l.lyricsFrom(widget.source!),
+              if (widget.controller.showTranslation && widget.controller.translation == null) l.noTranslationHint,
+              if (widget.controller.showRomanization && widget.controller.romanization == null) l.noRomanizationHint,
+            ].join(' · '),
+            textAlign: TextAlign.center,
             style: tt.labelSmall?.copyWith(color: cs.onSurfaceVariant)),
       ),
     ]);
@@ -572,6 +594,26 @@ class _SquareThumb extends SliderComponentShape {
   }
 }
 
+void _showActions(BuildContext context, NowPlaying np) {
+  final l = AppLocalizations.of(context);
+  showModalBottomSheet<void>(
+    context: context,
+    builder: (ctx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 18, 20, 16),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          Text('${l.playerActions} · ${platformName(np.sourceApp, np.sourceName)}', style: Theme.of(ctx).textTheme.titleMedium),
+          const SizedBox(height: 4),
+          Text(np.sourceApp, style: Theme.of(ctx).textTheme.labelSmall),
+          const SizedBox(height: 10),
+          if (np.playerActions.isEmpty) Text(l.playerActionsNone),
+          for (final a in np.playerActions) Padding(padding: const EdgeInsets.symmetric(vertical: 3), child: SelectableText(a)),
+        ]),
+      ),
+    ),
+  );
+}
+
 class _ControlBar extends StatelessWidget {
   final NowPlaying np;
   final VoidCallback onPlayPause, onFavorite;
@@ -587,16 +629,19 @@ class _ControlBar extends StatelessWidget {
       FavoriteIcon.star => Icons.star_border,
       FavoriteIcon.heart => Icons.favorite_border,
     };
-    Widget square(IconData icon, String tip, VoidCallback? onTap, {bool primary = false, bool dim = false}) => Tooltip(
+    Widget square(IconData icon, String tip, VoidCallback? onTap, {bool primary = false, bool dim = false, VoidCallback? onLongPress}) => Tooltip(
           message: tip,
           child: Material(
             color: primary ? cs.primary : cs.surfaceContainer,
-            borderRadius: BorderRadius.circular(controlRadius),
+            // Play/pause is a wide capsule (stadium); others rounded squares.
+            shape: primary ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(controlRadius)),
+            clipBehavior: Clip.antiAlias,
             child: InkWell(
-              borderRadius: BorderRadius.circular(controlRadius),
+              customBorder: primary ? const StadiumBorder() : RoundedRectangleBorder(borderRadius: BorderRadius.circular(controlRadius)),
               onTap: onTap,
+              onLongPress: onLongPress,
               child: SizedBox(
-                width: primary ? 72 : 52,
+                width: primary ? 112 : 52,
                 height: 52,
                 child: Icon(icon,
                     size: primary ? 30 : 24,
@@ -616,7 +661,8 @@ class _ControlBar extends StatelessWidget {
               np.canPlayPause ? onPlayPause : null, primary: true),
           const Spacer(),
           // Always tappable so unsupported players explain themselves via toast.
-          square(favIcon, l.favorite, onFavorite, dim: !np.canFavorite),
+          // Long-press: show which custom actions the player exposes (diagnostics).
+          square(favIcon, l.favorite, onFavorite, dim: !np.canFavorite, onLongPress: () => _showActions(context, np)),
         ]),
       ),
     );
@@ -647,23 +693,30 @@ class ExtrasToggles extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final cs = Theme.of(context).colorScheme;
-    Widget chip(String label, bool on, bool enabled, ValueChanged<bool> set) {
-      final active = on && enabled;
+    Widget chip(String label, bool on, bool enabled, String hint, ValueChanged<bool> set) {
+      final active = on;
       return Padding(
         padding: const EdgeInsets.only(left: 6),
         child: Material(
-          color: active ? cs.primary.withValues(alpha: .16) : cs.surfaceContainerHighest.withValues(alpha: enabled ? 1 : .5),
+          color: active ? cs.primary.withValues(alpha: .16) : cs.surfaceContainerHighest,
           borderRadius: BorderRadius.circular(10),
           child: InkWell(
             borderRadius: BorderRadius.circular(10),
-            onTap: enabled ? () => set(!on) : null,
+            onTap: () {
+              set(!on);
+              if (!on && !enabled) {
+                ScaffoldMessenger.of(context)
+                  ..hideCurrentSnackBar()
+                  ..showSnackBar(SnackBar(content: Text(hint), duration: const Duration(seconds: 2)));
+              }
+            },
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
               child: Text(label,
                   style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: !enabled ? cs.onSurfaceVariant.withValues(alpha: .4) : (active ? cs.primary : cs.onSurfaceVariant))),
+                      color: active ? cs.primary : cs.onSurfaceVariant.withValues(alpha: enabled ? 1 : .6))),
             ),
           ),
         ),
@@ -672,8 +725,9 @@ class ExtrasToggles extends StatelessWidget {
 
     final c = controller;
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      chip(l.translation, c.showTranslation, c.translation != null, c.setShowTranslation),
-      chip(l.romanization, c.showRomanization, c.romanization != null, c.setShowRomanization),
+      chip(l.translation, c.showTranslation, c.translation != null, l.noTranslationHint, c.setShowTranslation),
+      chip(c.romanizationAuto ? '${l.romanization} · ${l.autoLabel}' : l.romanization, c.showRomanization,
+          c.romanization != null, l.noRomanizationHint, c.setShowRomanization),
     ]);
   }
 }
