@@ -129,4 +129,21 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get playerActionsNone => 'Bu oynatıcı ek eylem sunmuyor';
+
+  @override
+  String get autoTranslateLabel => 'Otomatik çeviri';
+
+  @override
+  String get translatingHint => 'Çevriliyor…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Çeviri modeli indiriliyor (yaklaşık 30 MB, yalnızca ilk sefer)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Bugünkü ücretsiz çeviri kotası doldu — yarın tekrar deneyin';
+
+  @override
+  String get translateFailedHint => 'Otomatik çeviri başarısız oldu';
 }

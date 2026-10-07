@@ -1,6 +1,6 @@
-Canto preview — personal learning project, non-profit. Does not provide music. Lyrics from LRCLIB / LrcAPI / LrcShare; copyright belongs to rights holders.
+Canto preview — personal learning project, non-profit. Does not provide music. Lyrics from LRCLIB / LrcAPI / LrcShare; auto-translation by ML Kit (Android) / MyMemory (desktop); copyright belongs to rights holders.
 
-What's new in 0.1.2-preview: translation/romanization toggles always tappable with "no data" hints; local "auto" romanization (pinyin / kana romaji / Korean RR); looser LrcShare matching; Android favorite detection widened (custom actions + any rating; long-press to inspect); queue switching with Next/Previous stepping fallback (Android, Linux); capsule play button; source platform name under the artist; 19 UI languages incl. Arabic RTL with an in-app picker.
+What's new in 0.1.3-preview: automatic translation when LrcShare has none (labelled "Auto-translated"). Android uses Google ML Kit on-device (≈30 MB model download per language on first use, then offline). Desktop uses the free MyMemory API — lyric lines are sent to MyMemory; daily free quota ≈5,000 chars, a hint shows when it runs out. Target = app language (English if the original already is). Only runs when the Translation toggle is on; memory-only, cleared on track change.
 
 | File | Platform |
 |---|---|

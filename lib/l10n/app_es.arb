@@ -37,5 +37,10 @@
   "language": "Idioma",
   "followSystem": "Igual que el sistema",
   "playerActions": "Acciones del reproductor",
-  "playerActionsNone": "Este reproductor no ofrece acciones adicionales"
+  "playerActionsNone": "Este reproductor no ofrece acciones adicionales",
+  "autoTranslateLabel": "Traducción automática",
+  "translatingHint": "Traduciendo…",
+  "modelDownloadingHint": "Descargando el modelo de traducción (unos 30 MB, solo la primera vez)…",
+  "translateQuotaHint": "Se agotó la cuota gratuita de traducción de hoy; inténtalo mañana",
+  "translateFailedHint": "Falló la traducción automática"
 }

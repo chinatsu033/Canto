@@ -37,5 +37,10 @@
   "language": "언어",
   "followSystem": "시스템 설정 따르기",
   "playerActions": "플레이어 동작",
-  "playerActionsNone": "이 플레이어는 추가 동작을 제공하지 않습니다"
+  "playerActionsNone": "이 플레이어는 추가 동작을 제공하지 않습니다",
+  "autoTranslateLabel": "자동 번역",
+  "translatingHint": "번역 중…",
+  "modelDownloadingHint": "번역 모델 다운로드 중(약 30MB, 최초 1회)…",
+  "translateQuotaHint": "오늘의 무료 번역 한도를 모두 사용했습니다. 내일 다시 시도하세요",
+  "translateFailedHint": "자동 번역에 실패했습니다"
 }

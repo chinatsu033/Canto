@@ -37,5 +37,10 @@
   "language": "Bahasa",
   "followSystem": "Ikuti sistem",
   "playerActions": "Aksi pemutar",
-  "playerActionsNone": "Pemutar ini tidak menyediakan aksi tambahan"
+  "playerActionsNone": "Pemutar ini tidak menyediakan aksi tambahan",
+  "autoTranslateLabel": "Terjemahan otomatis",
+  "translatingHint": "Menerjemahkan…",
+  "modelDownloadingHint": "Mengunduh model terjemahan (sekitar 30 MB, hanya pertama kali)…",
+  "translateQuotaHint": "Kuota terjemahan gratis hari ini habis — coba lagi besok",
+  "translateFailedHint": "Terjemahan otomatis gagal"
 }

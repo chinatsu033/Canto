@@ -130,4 +130,21 @@ class AppLocalizationsHi extends AppLocalizations {
 
   @override
   String get playerActionsNone => 'यह प्लेयर कोई अतिरिक्त कार्रवाई नहीं देता';
+
+  @override
+  String get autoTranslateLabel => 'स्वचालित अनुवाद';
+
+  @override
+  String get translatingHint => 'अनुवाद हो रहा है…';
+
+  @override
+  String get modelDownloadingHint =>
+      'अनुवाद मॉडल डाउनलोड हो रहा है (लगभग 30 MB, केवल पहली बार)…';
+
+  @override
+  String get translateQuotaHint =>
+      'आज का मुफ़्त अनुवाद कोटा समाप्त हो गया — कल फिर कोशिश करें';
+
+  @override
+  String get translateFailedHint => 'स्वचालित अनुवाद विफल रहा';
 }

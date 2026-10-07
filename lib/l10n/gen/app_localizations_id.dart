@@ -131,4 +131,21 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get playerActionsNone => 'Pemutar ini tidak menyediakan aksi tambahan';
+
+  @override
+  String get autoTranslateLabel => 'Terjemahan otomatis';
+
+  @override
+  String get translatingHint => 'Menerjemahkan…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Mengunduh model terjemahan (sekitar 30 MB, hanya pertama kali)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Kuota terjemahan gratis hari ini habis — coba lagi besok';
+
+  @override
+  String get translateFailedHint => 'Terjemahan otomatis gagal';
 }

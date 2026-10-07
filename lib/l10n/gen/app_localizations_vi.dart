@@ -131,4 +131,21 @@ class AppLocalizationsVi extends AppLocalizations {
 
   @override
   String get playerActionsNone => 'Trình phát này không có thao tác bổ sung';
+
+  @override
+  String get autoTranslateLabel => 'Dịch tự động';
+
+  @override
+  String get translatingHint => 'Đang dịch…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Đang tải mô hình dịch (khoảng 30 MB, chỉ lần đầu)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Đã hết hạn mức dịch miễn phí hôm nay — hãy thử lại vào ngày mai';
+
+  @override
+  String get translateFailedHint => 'Dịch tự động thất bại';
 }

@@ -311,6 +311,7 @@ class _ArtworkAndSegment extends StatelessWidget {
           final i = activeLineIndex(lines, position);
           final cur = i >= 0 ? lines[i].text : '♪';
           final next = i + 1 < lines.length ? lines[i + 1].text : '';
+          final extra = secondaryLines(context, controller, i, compact: true);
           final key = ValueKey<int>(i);
           // Apple Music-like: new segment slides up in, old one slides up out.
           return ClipRect(
@@ -339,9 +340,9 @@ class _ArtworkAndSegment extends StatelessWidget {
                   Text(cur.isEmpty ? '♪' : cur,
                       maxLines: 2, overflow: TextOverflow.ellipsis,
                       style: tt.titleLarge?.copyWith(fontWeight: FontWeight.w700, color: cs.primary)),
-                  ...secondaryLines(context, controller, i, compact: true),
+                  ...extra,
                   const SizedBox(height: 8),
-                  Text(next, maxLines: 2, overflow: TextOverflow.ellipsis, style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
+                  Text(next, maxLines: extra.isEmpty ? 2 : 1, overflow: TextOverflow.ellipsis, style: tt.titleMedium?.copyWith(color: cs.onSurfaceVariant)),
                 ],
               ))),
             ),
@@ -485,7 +486,7 @@ class _LyricsViewState extends State<_LyricsView> {
           icon: const Icon(Icons.keyboard_arrow_down),
         ),
         const Spacer(),
-        ExtrasToggles(controller: widget.controller),
+        ExtrasToggles(controller: widget.controller, announce: false),
         if (!_follow && r is SyncedLyrics)
           TextButton.icon(
             onPressed: () => setState(() { _follow = true; _lastIndex = -2; }),
@@ -499,7 +500,7 @@ class _LyricsViewState extends State<_LyricsView> {
         child: Text(
             [
               if (widget.source != null) l.lyricsFrom(widget.source!),
-              if (widget.controller.showTranslation && widget.controller.translation == null) l.noTranslationHint,
+              if (widget.controller.showTranslation && widget.controller.translation == null) translationHint(l, widget.controller),
               if (widget.controller.showRomanization && widget.controller.romanization == null) l.noRomanizationHint,
             ].join(' · '),
             textAlign: TextAlign.center,
@@ -686,9 +687,52 @@ List<Widget> secondaryLines(BuildContext context, CantoController c, int i, {boo
 
 /// 翻译 / 罗马音 toggles: rounded-square, default off, persisted; disabled
 /// (greyed) when LrcShare has no aligned version for this track.
-class ExtrasToggles extends StatelessWidget {
+/// Footer/snackbar hint for the translation toggle when nothing is shown yet.
+String translationHint(AppLocalizations l, CantoController c) => switch (c.translateStatus) {
+      'working' => l.translatingHint,
+      'downloading' => l.modelDownloadingHint,
+      'quota' => l.translateQuotaHint,
+      'failed' => l.translateFailedHint,
+      _ => c.translator == null || c.lyrics is! SyncedLyrics ? l.noTranslationHint : l.translatingHint,
+    };
+
+class ExtrasToggles extends StatefulWidget {
   final CantoController controller;
-  const ExtrasToggles({super.key, required this.controller});
+  final bool announce; // show status snackbars (only one instance should)
+  const ExtrasToggles({super.key, required this.controller, this.announce = true});
+  @override
+  State<ExtrasToggles> createState() => _ExtrasTogglesState();
+}
+
+class _ExtrasTogglesState extends State<ExtrasToggles> {
+  String? _last;
+  CantoController get controller => widget.controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller.addListener(_onChange);
+  }
+
+  @override
+  void dispose() {
+    controller.removeListener(_onChange);
+    super.dispose();
+  }
+
+  void _onChange() {
+    final st = controller.translateStatus;
+    if (st == _last || !mounted) return;
+    _last = st;
+    if (!widget.announce || !controller.showTranslation) return;
+    if (st == 'downloading' || st == 'quota' || st == 'failed') {
+      final l = AppLocalizations.of(context);
+      ScaffoldMessenger.maybeOf(context)
+        ?..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(translationHint(l, controller)), duration: const Duration(seconds: 4)));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
@@ -725,7 +769,8 @@ class ExtrasToggles extends StatelessWidget {
 
     final c = controller;
     return Row(mainAxisSize: MainAxisSize.min, children: [
-      chip(l.translation, c.showTranslation, c.translation != null, l.noTranslationHint, c.setShowTranslation),
+      chip(c.translationAuto ? l.autoTranslateLabel : l.translation, c.showTranslation, c.translation != null,
+          translationHint(l, c), c.setShowTranslation),
       chip(c.romanizationAuto ? '${l.romanization} · ${l.autoLabel}' : l.romanization, c.showRomanization,
           c.romanization != null, l.noRomanizationHint, c.setShowRomanization),
     ]);

@@ -361,6 +361,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This player exposes no extra actions'**
   String get playerActionsNone;
+
+  /// No description provided for @autoTranslateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-translated'**
+  String get autoTranslateLabel;
+
+  /// No description provided for @translatingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Translating…'**
+  String get translatingHint;
+
+  /// No description provided for @modelDownloadingHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Downloading the translation model (about 30 MB, first time only)…'**
+  String get modelDownloadingHint;
+
+  /// No description provided for @translateQuotaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s free translation quota is used up — try again tomorrow'**
+  String get translateQuotaHint;
+
+  /// No description provided for @translateFailedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic translation failed'**
+  String get translateFailedHint;
 }
 
 class _AppLocalizationsDelegate

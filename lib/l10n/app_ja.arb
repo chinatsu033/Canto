@@ -37,5 +37,10 @@
   "language": "言語",
   "followSystem": "システムに従う",
   "playerActions": "プレーヤーの操作",
-  "playerActionsNone": "このプレーヤーには追加の操作がありません"
+  "playerActionsNone": "このプレーヤーには追加の操作がありません",
+  "autoTranslateLabel": "自動翻訳",
+  "translatingHint": "翻訳中…",
+  "modelDownloadingHint": "翻訳モデルをダウンロード中（約 30 MB、初回のみ）…",
+  "translateQuotaHint": "本日の無料翻訳の上限に達しました。明日もう一度お試しください",
+  "translateFailedHint": "自動翻訳に失敗しました"
 }

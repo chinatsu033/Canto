@@ -1,4 +1,8 @@
 import 'dart:async';
+import 'dart:io' show Platform;
+import 'dart:ui' show PlatformDispatcher;
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'translate.dart';
 import 'package:flutter/material.dart';
 import 'lrc.dart';
 import 'lrclib.dart';
@@ -35,6 +39,7 @@ class CantoController extends ChangeNotifier {
     LyricsFetcher? fetchLyrics,
     this.pollInterval = const Duration(seconds: 1),
     LrcShareSession? extras,
+    this.translator,
   })  : fetchLyrics = fetchLyrics ?? _defaultFetcher,
         extras = extras ?? (fetchLyrics == null ? lrcShare : null);
 
@@ -52,6 +57,74 @@ class CantoController extends ChangeNotifier {
   Map<int, String>? translation; // displayed line index -> text
   Map<int, String>? romanization;
   bool romanizationAuto = false; // generated locally, not from LrcShare
+  bool translationAuto = false; // machine-translated (ML Kit / MyMemory)
+  /// null, 'working', 'downloading', 'quota', 'failed', 'unavailable'
+  String? translateStatus;
+  final Translator? translator;
+  String? _translatedFor;
+  LyricsResult? _extrasFor;
+
+  static Translator? defaultTranslator() {
+    if (kIsWeb) return null;
+    if (Platform.isAndroid) return MlKitTranslator();
+    if (Platform.isMacOS || Platform.isWindows || Platform.isLinux) return MyMemoryTranslator(gate);
+    return null;
+  }
+
+  String _appTag() {
+    final t = localeTag;
+    if (t != null) return t;
+    final l = PlatformDispatcher.instance.locale;
+    final hant = l.scriptCode == 'Hant' || const ['TW', 'HK', 'MO'].contains(l.countryCode);
+    if (l.languageCode == 'zh') return hant ? 'zh_Hant' : 'zh';
+    const supported = ['en', 'ja', 'ko', 'fr', 'de', 'es', 'pt', 'it', 'ru', 'ar', 'th', 'vi', 'id', 'ms', 'tr', 'hi'];
+    return supported.contains(l.languageCode) ? l.languageCode : 'zh'; // same default as the UI
+  }
+
+  Future<void> _autoTranslate() async {
+    final np = nowPlaying;
+    final res = lyrics;
+    final tr = translator;
+    if (np == null || res is! SyncedLyrics || tr == null || translation != null) return;
+    final key = np.trackKey;
+    if (_translatedFor == key) return;
+    _translatedFor = key;
+    final texts = [for (final l in res.lines) l.text];
+    final src = guessLang(texts.join());
+    final tgt = targetLangFor(_appTag(), src);
+    translateStatus = 'working';
+    notifyListeners();
+    try {
+      final out = await tr.translate(texts, src, tgt, onDownloading: () {
+        if (_trackKey == key) {
+          translateStatus = 'downloading';
+          notifyListeners();
+        }
+      }, onPartial: (part) {
+        final m = toLineMap(part);
+        if (_trackKey == key && m != null) {
+          translation = m;
+          translationAuto = true;
+          notifyListeners();
+        }
+      });
+      if (_trackKey != key) return;
+      translation = toLineMap(out);
+      translationAuto = translation != null;
+      translateStatus = translation == null ? 'failed' : null;
+    } on TranslateException catch (e) {
+      debugPrint('DBG tex ${e.kind}');
+      if (_trackKey != key) return;
+      translateStatus = e.kind.name;
+      if (e.kind == TranslateFailure.failed) _translatedFor = null; // allow retry via toggle
+    } catch (e) {
+      debugPrint('DBG err ${e.runtimeType}');
+      if (_trackKey != key) return;
+      translateStatus = 'failed';
+      _translatedFor = null;
+    }
+    notifyListeners();
+  }
   Color? _fallbackAccent; // from LrcShare cover, this playback only
 
   /// UI language tag (e.g. 'ja', 'zh_Hant_HK'); null = follow system.
@@ -83,6 +156,7 @@ class CantoController extends ChangeNotifier {
   Future<void> setShowTranslation(bool v) async {
     showTranslation = v;
     notifyListeners();
+    if (v && _extrasFor != null && translation == null) unawaited(_autoTranslate());
     try {
       (await SharedPreferences.getInstance()).setBool('showTranslation', v);
     } catch (_) {}
@@ -105,9 +179,13 @@ class CantoController extends ChangeNotifier {
       notifyListeners();
     }
     final ex = extras;
-    if (ex == null) return;
-    final data = await ex.forTrack(np);
-    if (_trackKey != key || data == null) return;
+    final data = ex == null ? null : await ex.forTrack(np);
+    if (_trackKey != key) return;
+    if (data == null) {
+      _extrasFor = res;
+      if (showTranslation && translation == null) await _autoTranslate();
+      return;
+    }
     if (res is SyncedLyrics) {
       final lang = originalLangOf(data, res.lines);
       final tr = pickTranslation(data.versions, lang);
@@ -127,7 +205,12 @@ class CantoController extends ChangeNotifier {
         }
       } catch (_) {}
     }
-    if (_trackKey == key) notifyListeners();
+    if (_trackKey == key) {
+      _extrasFor = res;
+      notifyListeners();
+      // Only spend translator quota/model download when the user wants translations.
+      if (showTranslation && translation == null) await _autoTranslate();
+    }
   }
 
   void start() {
@@ -157,6 +240,10 @@ class CantoController extends ChangeNotifier {
       lyrics = null;
       lyricsSource = null;
       translation = null;
+      translationAuto = false;
+      translateStatus = null;
+      _translatedFor = null;
+      _extrasFor = null;
       romanization = null;
       romanizationAuto = false;
       _fallbackAccent = null;

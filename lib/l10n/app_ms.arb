@@ -37,5 +37,10 @@
   "language": "Bahasa",
   "followSystem": "Ikut sistem",
   "playerActions": "Tindakan pemain",
-  "playerActionsNone": "Pemain ini tidak menyediakan tindakan tambahan"
+  "playerActionsNone": "Pemain ini tidak menyediakan tindakan tambahan",
+  "autoTranslateLabel": "Terjemahan automatik",
+  "translatingHint": "Menterjemah…",
+  "modelDownloadingHint": "Memuat turun model terjemahan (kira-kira 30 MB, kali pertama sahaja)…",
+  "translateQuotaHint": "Kuota terjemahan percuma hari ini telah habis — cuba lagi esok",
+  "translateFailedHint": "Terjemahan automatik gagal"
 }

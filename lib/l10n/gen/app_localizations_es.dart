@@ -132,4 +132,21 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get playerActionsNone =>
       'Este reproductor no ofrece acciones adicionales';
+
+  @override
+  String get autoTranslateLabel => 'Traducción automática';
+
+  @override
+  String get translatingHint => 'Traduciendo…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Descargando el modelo de traducción (unos 30 MB, solo la primera vez)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Se agotó la cuota gratuita de traducción de hoy; inténtalo mañana';
+
+  @override
+  String get translateFailedHint => 'Falló la traducción automática';
 }

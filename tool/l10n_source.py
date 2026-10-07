@@ -162,6 +162,32 @@ T["hi"] = ["Canto","अभी कुछ नहीं चल रहा","कि�
 "इस गाने का अभी अनुवाद नहीं है","इस गाने का अभी रोमन लिप्यंतरण नहीं है","ऑटो","भाषा","सिस्टम के अनुसार","प्लेयर की कार्रवाइयाँ","यह प्लेयर कोई अतिरिक्त कार्रवाई नहीं देता"]
 
 # Native names for the language picker (not translated per UI language).
+
+# v0.1.3 keys: autoTranslateLabel, translatingHint, modelDownloadingHint, translateQuotaHint, translateFailedHint
+KEYS += ["autoTranslateLabel","translatingHint","modelDownloadingHint","translateQuotaHint","translateFailedHint"]
+EXTRA = {
+"en":["Auto-translated","Translating…","Downloading the translation model (about 30 MB, first time only)…","Today's free translation quota is used up — try again tomorrow","Automatic translation failed"],
+"zh":["自动翻译","正在翻译…","首次使用，正在下载翻译模型（约 30 MB）…","今日免费翻译额度已用完，请明天再试","自动翻译失败"],
+"zh_Hant":["自動翻譯","正在翻譯…","首次使用，正在下載翻譯模型（約 30 MB）…","今日免費翻譯額度已用完，請明天再試","自動翻譯失敗"],
+"zh_Hant_HK":["自動翻譯","正在翻譯…","首次使用，正在下載翻譯模型（約 30 MB）…","今日免費翻譯額度已用完，請明天再試","自動翻譯失敗"],
+"ja":["自動翻訳","翻訳中…","翻訳モデルをダウンロード中（約 30 MB、初回のみ）…","本日の無料翻訳の上限に達しました。明日もう一度お試しください","自動翻訳に失敗しました"],
+"ko":["자동 번역","번역 중…","번역 모델 다운로드 중(약 30MB, 최초 1회)…","오늘의 무료 번역 한도를 모두 사용했습니다. 내일 다시 시도하세요","자동 번역에 실패했습니다"],
+"fr":["Traduction automatique","Traduction…","Téléchargement du modèle de traduction (env. 30 Mo, une seule fois)…","Quota de traduction gratuit du jour épuisé — réessayez demain","La traduction automatique a échoué"],
+"de":["Automatisch übersetzt","Wird übersetzt…","Übersetzungsmodell wird geladen (ca. 30 MB, nur beim ersten Mal)…","Das heutige kostenlose Übersetzungskontingent ist aufgebraucht – morgen erneut versuchen","Automatische Übersetzung fehlgeschlagen"],
+"es":["Traducción automática","Traduciendo…","Descargando el modelo de traducción (unos 30 MB, solo la primera vez)…","Se agotó la cuota gratuita de traducción de hoy; inténtalo mañana","Falló la traducción automática"],
+"pt":["Tradução automática","Traduzindo…","Baixando o modelo de tradução (cerca de 30 MB, só na primeira vez)…","A cota gratuita de tradução de hoje acabou — tente amanhã","A tradução automática falhou"],
+"it":["Traduzione automatica","Traduzione in corso…","Download del modello di traduzione (circa 30 MB, solo la prima volta)…","Quota di traduzione gratuita di oggi esaurita: riprova domani","Traduzione automatica non riuscita"],
+"ru":["Автоперевод","Перевод…","Загрузка модели перевода (около 30 МБ, только в первый раз)…","Бесплатный лимит перевода на сегодня исчерпан — попробуйте завтра","Не удалось выполнить автоперевод"],
+"ar":["ترجمة تلقائية","جارٍ الترجمة…","جارٍ تنزيل نموذج الترجمة (حوالي 30 ميغابايت، للمرة الأولى فقط)…","نفدت حصة الترجمة المجانية لليوم — حاول غدًا","فشلت الترجمة التلقائية"],
+"th":["แปลอัตโนมัติ","กำลังแปล…","กำลังดาวน์โหลดโมเดลแปลภาษา (ประมาณ 30 MB ครั้งแรกเท่านั้น)…","โควตาการแปลฟรีของวันนี้หมดแล้ว ลองใหม่พรุ่งนี้","การแปลอัตโนมัติล้มเหลว"],
+"vi":["Dịch tự động","Đang dịch…","Đang tải mô hình dịch (khoảng 30 MB, chỉ lần đầu)…","Đã hết hạn mức dịch miễn phí hôm nay — hãy thử lại vào ngày mai","Dịch tự động thất bại"],
+"id":["Terjemahan otomatis","Menerjemahkan…","Mengunduh model terjemahan (sekitar 30 MB, hanya pertama kali)…","Kuota terjemahan gratis hari ini habis — coba lagi besok","Terjemahan otomatis gagal"],
+"ms":["Terjemahan automatik","Menterjemah…","Memuat turun model terjemahan (kira-kira 30 MB, kali pertama sahaja)…","Kuota terjemahan percuma hari ini telah habis — cuba lagi esok","Terjemahan automatik gagal"],
+"tr":["Otomatik çeviri","Çevriliyor…","Çeviri modeli indiriliyor (yaklaşık 30 MB, yalnızca ilk sefer)…","Bugünkü ücretsiz çeviri kotası doldu — yarın tekrar deneyin","Otomatik çeviri başarısız oldu"],
+"hi":["स्वचालित अनुवाद","अनुवाद हो रहा है…","अनुवाद मॉडल डाउनलोड हो रहा है (लगभग 30 MB, केवल पहली बार)…","आज का मुफ़्त अनुवाद कोटा समाप्त हो गया — कल फिर कोशिश करें","स्वचालित अनुवाद विफल रहा"],
+}
+for _k, _v in EXTRA.items():
+    T[_k] = T[_k] + _v
 NATIVE = {"zh":"简体中文","zh_Hant":"繁體中文（台灣）","zh_Hant_HK":"繁體中文（香港）","en":"English","ja":"日本語","ko":"한국어",
 "fr":"Français","de":"Deutsch","es":"Español","pt":"Português (Brasil)","it":"Italiano","ru":"Русский","ar":"العربية",
 "th":"ไทย","vi":"Tiếng Việt","id":"Bahasa Indonesia","ms":"Bahasa Melayu","tr":"Türkçe","hi":"हिन्दी"}

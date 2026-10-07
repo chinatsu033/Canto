@@ -37,5 +37,10 @@
   "language": "اللغة",
   "followSystem": "حسب النظام",
   "playerActions": "إجراءات المشغّل",
-  "playerActionsNone": "لا يوفّر هذا المشغّل إجراءات إضافية"
+  "playerActionsNone": "لا يوفّر هذا المشغّل إجراءات إضافية",
+  "autoTranslateLabel": "ترجمة تلقائية",
+  "translatingHint": "جارٍ الترجمة…",
+  "modelDownloadingHint": "جارٍ تنزيل نموذج الترجمة (حوالي 30 ميغابايت، للمرة الأولى فقط)…",
+  "translateQuotaHint": "نفدت حصة الترجمة المجانية لليوم — حاول غدًا",
+  "translateFailedHint": "فشلت الترجمة التلقائية"
 }

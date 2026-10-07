@@ -37,5 +37,10 @@
   "language": "Sprache",
   "followSystem": "Wie System",
   "playerActions": "Player-Aktionen",
-  "playerActionsNone": "Dieser Player bietet keine zusätzlichen Aktionen"
+  "playerActionsNone": "Dieser Player bietet keine zusätzlichen Aktionen",
+  "autoTranslateLabel": "Automatisch übersetzt",
+  "translatingHint": "Wird übersetzt…",
+  "modelDownloadingHint": "Übersetzungsmodell wird geladen (ca. 30 MB, nur beim ersten Mal)…",
+  "translateQuotaHint": "Das heutige kostenlose Übersetzungskontingent ist aufgebraucht – morgen erneut versuchen",
+  "translateFailedHint": "Automatische Übersetzung fehlgeschlagen"
 }

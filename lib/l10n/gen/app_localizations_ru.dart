@@ -132,4 +132,21 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get playerActionsNone =>
       'Этот плеер не предоставляет дополнительных действий';
+
+  @override
+  String get autoTranslateLabel => 'Автоперевод';
+
+  @override
+  String get translatingHint => 'Перевод…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Загрузка модели перевода (около 30 МБ, только в первый раз)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Бесплатный лимит перевода на сегодня исчерпан — попробуйте завтра';
+
+  @override
+  String get translateFailedHint => 'Не удалось выполнить автоперевод';
 }

@@ -37,5 +37,10 @@
   "language": "語言",
   "followSystem": "跟隨系統",
   "playerActions": "播放器操作",
-  "playerActionsNone": "此播放器沒有提供額外操作"
+  "playerActionsNone": "此播放器沒有提供額外操作",
+  "autoTranslateLabel": "自動翻譯",
+  "translatingHint": "正在翻譯…",
+  "modelDownloadingHint": "首次使用，正在下載翻譯模型（約 30 MB）…",
+  "translateQuotaHint": "今日免費翻譯額度已用完，請明天再試",
+  "translateFailedHint": "自動翻譯失敗"
 }

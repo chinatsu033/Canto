@@ -129,4 +129,21 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get playerActionsNone => 'لا يوفّر هذا المشغّل إجراءات إضافية';
+
+  @override
+  String get autoTranslateLabel => 'ترجمة تلقائية';
+
+  @override
+  String get translatingHint => 'جارٍ الترجمة…';
+
+  @override
+  String get modelDownloadingHint =>
+      'جارٍ تنزيل نموذج الترجمة (حوالي 30 ميغابايت، للمرة الأولى فقط)…';
+
+  @override
+  String get translateQuotaHint =>
+      'نفدت حصة الترجمة المجانية لليوم — حاول غدًا';
+
+  @override
+  String get translateFailedHint => 'فشلت الترجمة التلقائية';
 }

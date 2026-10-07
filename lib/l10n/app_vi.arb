@@ -37,5 +37,10 @@
   "language": "Ngôn ngữ",
   "followSystem": "Theo hệ thống",
   "playerActions": "Thao tác của trình phát",
-  "playerActionsNone": "Trình phát này không có thao tác bổ sung"
+  "playerActionsNone": "Trình phát này không có thao tác bổ sung",
+  "autoTranslateLabel": "Dịch tự động",
+  "translatingHint": "Đang dịch…",
+  "modelDownloadingHint": "Đang tải mô hình dịch (khoảng 30 MB, chỉ lần đầu)…",
+  "translateQuotaHint": "Đã hết hạn mức dịch miễn phí hôm nay — hãy thử lại vào ngày mai",
+  "translateFailedHint": "Dịch tự động thất bại"
 }

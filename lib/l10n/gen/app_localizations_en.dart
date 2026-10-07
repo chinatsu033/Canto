@@ -130,4 +130,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get playerActionsNone => 'This player exposes no extra actions';
+
+  @override
+  String get autoTranslateLabel => 'Auto-translated';
+
+  @override
+  String get translatingHint => 'Translating…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Downloading the translation model (about 30 MB, first time only)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Today\'s free translation quota is used up — try again tomorrow';
+
+  @override
+  String get translateFailedHint => 'Automatic translation failed';
 }

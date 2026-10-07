@@ -37,5 +37,10 @@
   "language": "भाषा",
   "followSystem": "सिस्टम के अनुसार",
   "playerActions": "प्लेयर की कार्रवाइयाँ",
-  "playerActionsNone": "यह प्लेयर कोई अतिरिक्त कार्रवाई नहीं देता"
+  "playerActionsNone": "यह प्लेयर कोई अतिरिक्त कार्रवाई नहीं देता",
+  "autoTranslateLabel": "स्वचालित अनुवाद",
+  "translatingHint": "अनुवाद हो रहा है…",
+  "modelDownloadingHint": "अनुवाद मॉडल डाउनलोड हो रहा है (लगभग 30 MB, केवल पहली बार)…",
+  "translateQuotaHint": "आज का मुफ़्त अनुवाद कोटा समाप्त हो गया — कल फिर कोशिश करें",
+  "translateFailedHint": "स्वचालित अनुवाद विफल रहा"
 }

@@ -37,5 +37,10 @@
   "language": "Язык",
   "followSystem": "Как в системе",
   "playerActions": "Действия плеера",
-  "playerActionsNone": "Этот плеер не предоставляет дополнительных действий"
+  "playerActionsNone": "Этот плеер не предоставляет дополнительных действий",
+  "autoTranslateLabel": "Автоперевод",
+  "translatingHint": "Перевод…",
+  "modelDownloadingHint": "Загрузка модели перевода (около 30 МБ, только в первый раз)…",
+  "translateQuotaHint": "Бесплатный лимит перевода на сегодня исчерпан — попробуйте завтра",
+  "translateFailedHint": "Не удалось выполнить автоперевод"
 }

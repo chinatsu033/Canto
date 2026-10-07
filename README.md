@@ -26,9 +26,13 @@ Canto 是一个**个人学习项目，非营利**。它读取系统的“正在�
 3. **[LrcShare](https://lrcshare.com)**（小众人工整理曲库，含译文/罗马音/封面）：`/v1/search` → `/v1/lyric/:id?lyric_lines=1`。请求间隔 ≥300ms，不加防缓存参数。
 4. 都没有 → “暂无歌词”。绝不编造歌词。歌词视图底部显示实际来源（LRCLIB / LrcAPI / LrcShare）。
 
-所有请求带标识 User-Agent `Canto/0.1.2 (https://github.com/chinatsu033/Canto)`（同时附 `X-User-Agent`）；遇到 HTTP 429 指数退避（1s、2s，或遵循 Retry-After），不立即重试，多次失败后该来源暂停。
+所有请求带标识 User-Agent `Canto/0.1.3 (https://github.com/chinatsu033/Canto)`（同时附 `X-User-Agent`）；遇到 HTTP 429 指数退避（1s、2s，或遵循 Retry-After），不立即重试，多次失败后该来源暂停。
 
 **翻译 / 罗马音**：仅来自 LrcShare（即使歌词来自 LRCLIB/LrcAPI，也会每首歌额外请求一次 LrcShare）。按时间戳对齐到当前显示的原文行，沿用原文时间戳，不重新计时；无法对齐或没有对应版本时：罗马音回退到本地“自动”生成，翻译显示提示。译文优先简体中文（原文是中文时用英文）；罗马音：日语 ja-Latn、韩语 ko-Latn、中文 zh-Latn-pinyin（无则粤拼 jyutping）。两个开关默认关闭，可同时开启，设置会保存。
+**自动翻译**（v0.1.3）：优先使用 LrcShare 的人工翻译；没有时才自动翻译，并标注“自动翻译”。只在打开“翻译”开关后才会翻译。目标语言为 App 当前语言（默认简体中文；原文已是该语言时译为英文）。逐行翻译，沿用原文时间戳，不重新计时。译文只保存在内存中，切歌即清除，不写日志。
+- Android：Google ML Kit 端上翻译（语言识别 + 翻译，免费、无需 Key）。首次使用某语言时需下载约 30 MB 模型（会提示），之后离线可用；歌词不离开设备。
+- macOS / Windows / Linux：[MyMemory](https://mymemory.translated.net) 免费接口（无需 Key）。**隐私提示：桌面端会把歌词文本发送给 MyMemory 以获取译文**（除此之外不上传到任何地方）。多行合并为一个请求以减少次数，请求间隔约 1.2 秒；免费额度约每天 5000 字符（按 IP），用完时提示“今日免费翻译额度已用完”。机器翻译质量有限。
+
 **封面强调色**：优先用系统会话的封面；没有封面时才用 LrcShare 的封面（仅本次播放、仅内存）。
 
 感谢 LRCLIB、LrcAPI、LrcShare 提供免费服务。
@@ -66,7 +70,7 @@ Flutter 3.47。`flutter test` 覆盖 LRC 解析、同步逻辑、歌词来源顺
 Canto is a **personal learning project, non-profit**. It reads your system's now-playing info and shows lyrics fetched from free lyric services (LRCLIB, LrcAPI, LrcShare).
 
 - **Canto does not provide any music.** It never plays, caches or forwards audio, and uses no music-service SDKs or private APIs (Spotify / Apple Music / QQ Music / NetEase Cloud Music, etc.).
-- **Lyrics copyright belongs to the respective rights holders.** Lyrics, translations and romanizations are kept only in memory for the current track and dropped on track change or exit; never uploaded, logged, committed or bundled.
+- **Lyrics copyright belongs to the respective rights holders.** Lyrics, translations and romanizations are kept only in memory (desktop auto-translation sends lines to MyMemory, see below) for the current track and dropped on track change or exit; never uploaded, logged, committed or bundled.
 
 ### Lyric sources (all free, no key; queried one at a time, never in parallel)
 1. **[LRCLIB](https://lrclib.net)** (primary): `/api/get` (track/artist/album/duration) → without album → `/api/search` (track+artist) → `/api/search?q=` (cleaned title). Synced lyrics with the closest duration (±3 s) win; plain lyrics are shown as full text without scrolling; `instrumental` shows "Instrumental".
@@ -74,9 +78,12 @@ Canto is a **personal learning project, non-profit**. It reads your system's now
 3. **[LrcShare](https://lrcshare.com)** (small curated catalog with translation/romanization/cover): `/v1/search` → `/v1/lyric/:id?lyric_lines=1`, ≥300 ms between requests, no cache-busting parameters.
 4. Otherwise "No lyrics". Lyrics are never fabricated. The lyrics view shows the actual source (LRCLIB / LrcAPI / LrcShare).
 
-Every request sends the User-Agent `Canto/0.1.2 (https://github.com/chinatsu033/Canto)` (plus `X-User-Agent`). HTTP 429 triggers exponential backoff (1 s, 2 s, or Retry-After), never an immediate retry; repeated 429s pause that source.
+Every request sends the User-Agent `Canto/0.1.3 (https://github.com/chinatsu033/Canto)` (plus `X-User-Agent`). HTTP 429 triggers exponential backoff (1 s, 2 s, or Retry-After), never an immediate retry; repeated 429s pause that source.
 
 **Translation / romanization** come only from LrcShare (one extra LrcShare lookup per track, even when lyrics came from LRCLIB/LrcAPI). They are aligned to the displayed lines by timestamp and reuse the original timestamps (no re-timing); if no version exists or alignment fails, romanization falls back to local "auto" generation and translation shows a hint. Translation prefers Simplified Chinese (English if the original is Chinese); romanization uses ja-Latn / ko-Latn / zh-Latn-pinyin (jyutping as fallback). Both toggles default off, can be combined, and are remembered.
+**Auto-translation** (v0.1.3): LrcShare's human translation wins; otherwise Canto machine-translates and labels it "Auto-translated". It only runs once you turn the Translation toggle on. The target is the app language (Simplified Chinese by default; English if the original is already in that language). Line by line, reusing the original timestamps (no re-timing). Kept in memory only, cleared on track change, never logged.
+- Android: Google ML Kit on-device translation (language ID + translate; free, no key). The first use of a language downloads a ~30 MB model (a hint is shown); afterwards it works offline and lyrics never leave the device.
+- macOS / Windows / Linux: the free, keyless [MyMemory](https://mymemory.translated.net) API. **Privacy note: on desktop, lyric lines are sent to MyMemory to get the translation** (and nowhere else). Lines are batched into few requests spaced ~1.2 s apart; the free quota is about 5,000 characters/day per IP, after which a localized "quota used up" hint is shown. Machine-translation quality is limited.
 **Accent color** uses the system session artwork; only if there is none, the LrcShare cover (this playback only, memory only).
 
 Thanks to LRCLIB, LrcAPI and LrcShare for their free services.

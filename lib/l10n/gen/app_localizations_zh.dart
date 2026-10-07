@@ -127,6 +127,21 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get playerActionsNone => '该播放器没有提供额外操作';
+
+  @override
+  String get autoTranslateLabel => '自动翻译';
+
+  @override
+  String get translatingHint => '正在翻译…';
+
+  @override
+  String get modelDownloadingHint => '首次使用，正在下载翻译模型（约 30 MB）…';
+
+  @override
+  String get translateQuotaHint => '今日免费翻译额度已用完，请明天再试';
+
+  @override
+  String get translateFailedHint => '自动翻译失败';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -251,6 +266,21 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get playerActionsNone => '此播放器沒有提供額外操作';
+
+  @override
+  String get autoTranslateLabel => '自動翻譯';
+
+  @override
+  String get translatingHint => '正在翻譯…';
+
+  @override
+  String get modelDownloadingHint => '首次使用，正在下載翻譯模型（約 30 MB）…';
+
+  @override
+  String get translateQuotaHint => '今日免費翻譯額度已用完，請明天再試';
+
+  @override
+  String get translateFailedHint => '自動翻譯失敗';
 }
 
 /// The translations for Chinese, as used in Hong Kong, using the Han script (`zh_Hant_HK`).
@@ -375,4 +405,19 @@ class AppLocalizationsZhHantHk extends AppLocalizationsZh {
 
   @override
   String get playerActionsNone => '此播放器沒有提供額外操作';
+
+  @override
+  String get autoTranslateLabel => '自動翻譯';
+
+  @override
+  String get translatingHint => '正在翻譯…';
+
+  @override
+  String get modelDownloadingHint => '首次使用，正在下載翻譯模型（約 30 MB）…';
+
+  @override
+  String get translateQuotaHint => '今日免費翻譯額度已用完，請明天再試';
+
+  @override
+  String get translateFailedHint => '自動翻譯失敗';
 }

@@ -37,5 +37,10 @@
   "language": "Dil",
   "followSystem": "Sistemi izle",
   "playerActions": "Oynatıcı eylemleri",
-  "playerActionsNone": "Bu oynatıcı ek eylem sunmuyor"
+  "playerActionsNone": "Bu oynatıcı ek eylem sunmuyor",
+  "autoTranslateLabel": "Otomatik çeviri",
+  "translatingHint": "Çevriliyor…",
+  "modelDownloadingHint": "Çeviri modeli indiriliyor (yaklaşık 30 MB, yalnızca ilk sefer)…",
+  "translateQuotaHint": "Bugünkü ücretsiz çeviri kotası doldu — yarın tekrar deneyin",
+  "translateFailedHint": "Otomatik çeviri başarısız oldu"
 }

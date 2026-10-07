@@ -37,5 +37,10 @@
   "language": "ภาษา",
   "followSystem": "ตามระบบ",
   "playerActions": "การทำงานของเพลเยอร์",
-  "playerActionsNone": "เพลเยอร์นี้ไม่มีการทำงานเพิ่มเติม"
+  "playerActionsNone": "เพลเยอร์นี้ไม่มีการทำงานเพิ่มเติม",
+  "autoTranslateLabel": "แปลอัตโนมัติ",
+  "translatingHint": "กำลังแปล…",
+  "modelDownloadingHint": "กำลังดาวน์โหลดโมเดลแปลภาษา (ประมาณ 30 MB ครั้งแรกเท่านั้น)…",
+  "translateQuotaHint": "โควตาการแปลฟรีของวันนี้หมดแล้ว ลองใหม่พรุ่งนี้",
+  "translateFailedHint": "การแปลอัตโนมัติล้มเหลว"
 }

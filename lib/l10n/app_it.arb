@@ -37,5 +37,10 @@
   "language": "Lingua",
   "followSystem": "Come il sistema",
   "playerActions": "Azioni del player",
-  "playerActionsNone": "Questo player non offre azioni aggiuntive"
+  "playerActionsNone": "Questo player non offre azioni aggiuntive",
+  "autoTranslateLabel": "Traduzione automatica",
+  "translatingHint": "Traduzione in corso…",
+  "modelDownloadingHint": "Download del modello di traduzione (circa 30 MB, solo la prima volta)…",
+  "translateQuotaHint": "Quota di traduzione gratuita di oggi esaurita: riprova domani",
+  "translateFailedHint": "Traduzione automatica non riuscita"
 }

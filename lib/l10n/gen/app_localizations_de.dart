@@ -134,4 +134,21 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get playerActionsNone =>
       'Dieser Player bietet keine zusätzlichen Aktionen';
+
+  @override
+  String get autoTranslateLabel => 'Automatisch übersetzt';
+
+  @override
+  String get translatingHint => 'Wird übersetzt…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Übersetzungsmodell wird geladen (ca. 30 MB, nur beim ersten Mal)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Das heutige kostenlose Übersetzungskontingent ist aufgebraucht – morgen erneut versuchen';
+
+  @override
+  String get translateFailedHint => 'Automatische Übersetzung fehlgeschlagen';
 }

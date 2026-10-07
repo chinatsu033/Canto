@@ -130,4 +130,21 @@ class AppLocalizationsMs extends AppLocalizations {
   @override
   String get playerActionsNone =>
       'Pemain ini tidak menyediakan tindakan tambahan';
+
+  @override
+  String get autoTranslateLabel => 'Terjemahan automatik';
+
+  @override
+  String get translatingHint => 'Menterjemah…';
+
+  @override
+  String get modelDownloadingHint =>
+      'Memuat turun model terjemahan (kira-kira 30 MB, kali pertama sahaja)…';
+
+  @override
+  String get translateQuotaHint =>
+      'Kuota terjemahan percuma hari ini telah habis — cuba lagi esok';
+
+  @override
+  String get translateFailedHint => 'Terjemahan automatik gagal';
 }

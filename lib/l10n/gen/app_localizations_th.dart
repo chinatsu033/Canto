@@ -129,4 +129,21 @@ class AppLocalizationsTh extends AppLocalizations {
 
   @override
   String get playerActionsNone => 'เพลเยอร์นี้ไม่มีการทำงานเพิ่มเติม';
+
+  @override
+  String get autoTranslateLabel => 'แปลอัตโนมัติ';
+
+  @override
+  String get translatingHint => 'กำลังแปล…';
+
+  @override
+  String get modelDownloadingHint =>
+      'กำลังดาวน์โหลดโมเดลแปลภาษา (ประมาณ 30 MB ครั้งแรกเท่านั้น)…';
+
+  @override
+  String get translateQuotaHint =>
+      'โควตาการแปลฟรีของวันนี้หมดแล้ว ลองใหม่พรุ่งนี้';
+
+  @override
+  String get translateFailedHint => 'การแปลอัตโนมัติล้มเหลว';
 }

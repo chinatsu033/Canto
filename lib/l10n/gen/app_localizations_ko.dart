@@ -128,4 +128,19 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get playerActionsNone => '이 플레이어는 추가 동작을 제공하지 않습니다';
+
+  @override
+  String get autoTranslateLabel => '자동 번역';
+
+  @override
+  String get translatingHint => '번역 중…';
+
+  @override
+  String get modelDownloadingHint => '번역 모델 다운로드 중(약 30MB, 최초 1회)…';
+
+  @override
+  String get translateQuotaHint => '오늘의 무료 번역 한도를 모두 사용했습니다. 내일 다시 시도하세요';
+
+  @override
+  String get translateFailedHint => '자동 번역에 실패했습니다';
 }

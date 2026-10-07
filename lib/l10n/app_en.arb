@@ -38,6 +38,11 @@
   "followSystem": "Follow system",
   "playerActions": "Player actions",
   "playerActionsNone": "This player exposes no extra actions",
+  "autoTranslateLabel": "Auto-translated",
+  "translatingHint": "Translating…",
+  "modelDownloadingHint": "Downloading the translation model (about 30 MB, first time only)…",
+  "translateQuotaHint": "Today's free translation quota is used up — try again tomorrow",
+  "translateFailedHint": "Automatic translation failed",
   "@favoriteSent": {
     "placeholders": {
       "app": {
