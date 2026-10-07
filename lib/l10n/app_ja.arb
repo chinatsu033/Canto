@@ -24,6 +24,11 @@
   "permissionBody": "Android は通知へのアクセス権を持つアプリにのみ他アプリのメディアセッションを公開します。Canto はメディア情報のみを読み取り、通知の内容は読み取りません。",
   "grantPermission": "設定を開く",
   "sourceUnavailable": "このシステムでは再生中情報を取得できません",
-  "lyricsBy": "歌詞提供：LRCLIB",
-  "resumeFollow": "現在の行に戻る"
+  "resumeFollow": "現在の行に戻る",
+  "lyricsFrom": "歌詞提供：{source}",
+  "seekUnsupported": "このプレーヤーはシークに対応していません",
+  "commandFailed": "プレーヤーが操作を受け付けませんでした",
+  "instrumental": "インストゥルメンタル",
+  "translation": "翻訳",
+  "romanization": "ローマ字"
 }

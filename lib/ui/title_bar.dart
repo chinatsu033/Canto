@@ -29,12 +29,12 @@ class _DesktopTitleBarState extends State<DesktopTitleBar> {
             message: tip,
             child: Material(
               color: active ? cs.primary.withValues(alpha: .16) : cs.surfaceContainer,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
               child: InkWell(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(10),
                 onTap: onTap,
                 child: SizedBox(
-                    width: 30, height: 26, child: Icon(icon, size: 16, color: active ? cs.primary : cs.onSurfaceVariant)),
+                    width: 32, height: 28, child: Icon(icon, size: 16, color: active ? cs.primary : cs.onSurfaceVariant)),
               ),
             ),
           ),

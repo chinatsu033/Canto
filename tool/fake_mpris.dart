@@ -15,6 +15,7 @@ class FakePlayer extends DBusObject {
         'Position': DBusInt64(DateTime.now().difference(started).inMicroseconds),
         'CanPlay': const DBusBoolean(true),
         'CanPause': const DBusBoolean(true),
+        'CanSeek': const DBusBoolean(true),
         'Metadata': DBusDict.stringVariant({
           'mpris:trackid': DBusObjectPath('/canto/track/1'),
           'xesam:title': const DBusString('Canto Placeholder Track'),
@@ -53,6 +54,10 @@ class FakePlayer extends DBusObject {
     if (call.name == 'PlayPause') {
       playing = !playing;
       print('PlayPause -> playing=$playing');
+      return DBusMethodSuccessResponse();
+    }
+    if (call.name == 'SetPosition' || call.name == 'GoTo') {
+      print('${call.name} ${call.values.map((v) => v.toNative()).join(' ')}');
       return DBusMethodSuccessResponse();
     }
     if (call.name == 'GetTracksMetadata') {

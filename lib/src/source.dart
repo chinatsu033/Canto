@@ -10,6 +10,8 @@ abstract class NowPlayingSource {
   Future<NowPlaying?> current();
   Future<CommandResult> playPause();
   Future<CommandResult> favorite();
+  Future<CommandResult> seek(Duration position) async => CommandResult.unsupported;
+  Future<CommandResult> goToQueueItem(String id) async => CommandResult.unsupported;
   Future<bool> hasPermission() async => true;
   Future<void> requestPermission() async {}
   void dispose() {}
@@ -36,9 +38,9 @@ class ChannelSource extends NowPlayingSource {
     }
   }
 
-  Future<CommandResult> _cmd(String name) async {
+  Future<CommandResult> _cmd(String name, [Object? args]) async {
     try {
-      final r = await _ch.invokeMethod<String>(name);
+      final r = await _ch.invokeMethod<String>(name, args);
       return switch (r) {
         'ok' => CommandResult.ok,
         'unsupported' => CommandResult.unsupported,
@@ -53,6 +55,10 @@ class ChannelSource extends NowPlayingSource {
   Future<CommandResult> playPause() => _cmd('playPause');
   @override
   Future<CommandResult> favorite() => _cmd('favorite');
+  @override
+  Future<CommandResult> seek(Duration position) => _cmd('seek', {'positionMs': position.inMilliseconds});
+  @override
+  Future<CommandResult> goToQueueItem(String id) => _cmd('goToQueueItem', {'id': id});
 
   @override
   Future<bool> hasPermission() async {

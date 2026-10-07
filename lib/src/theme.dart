@@ -5,8 +5,8 @@ const lightBg = Color(0xFFFFFFFF);
 const lightCard = Color(0xFFF3F4F6);
 const darkBg = Color(0xFF1F1F1F);
 const darkCard = Color(0xFF2A2A2A);
-const controlRadius = 12.0; // all controls: rounded squares, never circles
-const cardRadius = 16.0;
+const controlRadius = 16.0; // all controls: rounded squares, never circles
+const cardRadius = 24.0;
 
 ThemeData buildTheme(Brightness b, Color? artworkColor) {
   final accent = readableAccent(artworkColor ?? fallbackAccent, b);

@@ -31,6 +31,18 @@
   "permissionBody": "Android only shares other apps' media sessions with apps that have notification access. Canto reads only media info, never notification content.",
   "grantPermission": "Open settings",
   "sourceUnavailable": "Now-playing info isn't available on this system",
-  "lyricsBy": "Lyrics from LRCLIB",
-  "resumeFollow": "Back to current line"
+  "resumeFollow": "Back to current line",
+  "lyricsFrom": "Lyrics from {source}",
+  "seekUnsupported": "This player doesn't allow seeking",
+  "commandFailed": "The player didn't accept the request",
+  "@lyricsFrom": {
+    "placeholders": {
+      "source": {
+        "type": "String"
+      }
+    }
+  },
+  "instrumental": "Instrumental",
+  "translation": "Translation",
+  "romanization": "Romanization"
 }

@@ -16,7 +16,7 @@ class MainFlutterWindow: NSWindow {
     let channel = FlutterMethodChannel(name: "canto/now_playing",
                                        binaryMessenger: flutterViewController.engine.binaryMessenger)
     channel.setMethodCallHandler { [weak self] call, result in
-      self?.nowPlaying.handle(call.method, result: result)
+      self?.nowPlaying.handle(call.method, args: call.arguments, result: result)
     }
     super.awakeFromNib()
   }
@@ -31,10 +31,12 @@ final class NowPlayingBridge {
   private typealias GetInfoFn = @convention(c) (DispatchQueue, @escaping @convention(block) (CFDictionary?) -> Void) -> Void
   private typealias GetPidFn = @convention(c) (DispatchQueue, @escaping @convention(block) (Int32) -> Void) -> Void
   private typealias SendCmdFn = @convention(c) (UInt32, CFDictionary?) -> Bool
+  private typealias SetElapsedFn = @convention(c) (Double) -> Void
 
   private var getInfo: GetInfoFn?
   private var getPid: GetPidFn?
   private var sendCmd: SendCmdFn?
+  private var setElapsed: SetElapsedFn?
   private let work = DispatchQueue(label: "canto.nowplaying")
   private var lastSource = "" // "mr", "music", "spotify"
   private var artKey = ""
@@ -46,11 +48,16 @@ final class NowPlayingBridge {
       if let p = dlsym(h, "MRMediaRemoteGetNowPlayingInfo") { getInfo = unsafeBitCast(p, to: GetInfoFn.self) }
       if let p = dlsym(h, "MRMediaRemoteGetNowPlayingApplicationPID") { getPid = unsafeBitCast(p, to: GetPidFn.self) }
       if let p = dlsym(h, "MRMediaRemoteSendCommand") { sendCmd = unsafeBitCast(p, to: SendCmdFn.self) }
+      if let p = dlsym(h, "MRMediaRemoteSetElapsedTime") { setElapsed = unsafeBitCast(p, to: SetElapsedFn.self) }
     }
   }
 
-  func handle(_ method: String, result: @escaping FlutterResult) {
+  func handle(_ method: String, args: Any?, result: @escaping FlutterResult) {
     switch method {
+    case "seek":
+      let ms = ((args as? [String: Any])?["positionMs"] as? NSNumber)?.doubleValue ?? 0
+      work.async { let r = self.seek(ms / 1000); DispatchQueue.main.async { result(r) } }
+    case "goToQueueItem": result("unsupported")
     case "get": snapshot { m in DispatchQueue.main.async { result(m) } }
     case "playPause": work.async { let r = self.playPause(); DispatchQueue.main.async { result(r) } }
     case "favorite": work.async { let r = self.favorite(); DispatchQueue.main.async { result(r) } }
@@ -90,6 +97,7 @@ final class NowPlayingBridge {
           "sourceName": app?.localizedName ?? bundle,
           "canPlayPause": true,
           "canFavorite": bundle == "com.apple.Music",
+          "canSeek": self.setElapsed != nil,
         ]
         if let d = info["kMRMediaRemoteNowPlayingInfoArtworkData"] as? Data {
           m["artwork"] = FlutterStandardTypedData(bytes: d)
@@ -135,7 +143,7 @@ final class NowPlayingBridge {
         "title": v[0].stringValue ?? "", "artist": v[1].stringValue ?? "", "album": v[2].stringValue ?? "",
         "durationMs": Int(v[3].doubleValue * 1000), "positionMs": Int(v[4].doubleValue * 1000),
         "positionAtMs": now, "playing": v[5].booleanValue,
-        "sourceApp": "com.apple.Music", "sourceName": "Music", "canPlayPause": true, "canFavorite": true,
+        "sourceApp": "com.apple.Music", "sourceName": "Music", "canPlayPause": true, "canFavorite": true, "canSeek": true,
       ]
       if let a = artData { m["artwork"] = FlutterStandardTypedData(bytes: a) }
       return m
@@ -159,7 +167,7 @@ final class NowPlayingBridge {
         "durationMs": Int(v[3].doubleValue), "positionMs": Int(v[4].doubleValue * 1000),
         "positionAtMs": now, "playing": v[5].booleanValue,
         // Spotify's AppleScript dictionary has no "save to library" command.
-        "sourceApp": "com.spotify.client", "sourceName": "Spotify", "canPlayPause": true, "canFavorite": false,
+        "sourceApp": "com.spotify.client", "sourceName": "Spotify", "canPlayPause": true, "canFavorite": false, "canSeek": true,
       ]
       if let a = artData { m["artwork"] = FlutterStandardTypedData(bytes: a) }
       return m
@@ -177,6 +185,19 @@ final class NowPlayingBridge {
     case "mr":
       guard let send = sendCmd else { return "unsupported" }
       return send(2 /* kMRTogglePlayPause */, nil) ? "ok" : "failed"
+    default: return "unsupported"
+    }
+  }
+
+  private func seek(_ seconds: Double) -> String {
+    let s = String(format: "%.3f", max(0, seconds))
+    switch lastSource {
+    case "music": return run("tell application \"Music\" to set player position to \(s)") != nil ? "ok" : "failed"
+    case "spotify": return run("tell application \"Spotify\" to set player position to \(s)") != nil ? "ok" : "failed"
+    case "mr":
+      guard let f = setElapsed else { return "unsupported" }
+      f(max(0, seconds))
+      return "ok"
     default: return "unsupported"
     }
   }

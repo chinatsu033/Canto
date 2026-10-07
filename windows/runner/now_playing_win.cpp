@@ -63,6 +63,7 @@ NowPlayingWin::NowPlayingWin(flutter::BinaryMessenger* messenger) {
           {flutter::EncodableValue("canPlayPause"), flutter::EncodableValue(s.can_play_pause)},
           // GSMTC exposes no favorite/rating command.
           {flutter::EncodableValue("canFavorite"), flutter::EncodableValue(false)},
+          {flutter::EncodableValue("canSeek"), flutter::EncodableValue(s.can_seek)},
       };
       if (!s.artwork.empty()) map[flutter::EncodableValue("artwork")] = flutter::EncodableValue(s.artwork);
       result->Success(flutter::EncodableValue(map));
@@ -71,6 +72,18 @@ NowPlayingWin::NowPlayingWin(flutter::BinaryMessenger* messenger) {
       std::thread t([&] { r = TogglePlayPause(); });
       t.join();
       result->Success(flutter::EncodableValue(r));
+    } else if (m == "seek") {
+      int64_t ms = 0;
+      if (const auto* args = std::get_if<flutter::EncodableMap>(call.arguments())) {
+        auto it = args->find(flutter::EncodableValue("positionMs"));
+        if (it != args->end()) ms = it->second.LongValue();
+      }
+      std::string r = "failed";
+      std::thread t([&] { r = Seek(ms); });
+      t.join();
+      result->Success(flutter::EncodableValue(r));
+    } else if (m == "goToQueueItem") {
+      result->Success(flutter::EncodableValue(std::string("unsupported")));
     } else if (m == "favorite") {
       result->Success(flutter::EncodableValue(std::string("unsupported")));
     } else if (m == "hasPermission") {
@@ -119,6 +132,7 @@ void NowPlayingWin::PollLoop() {
         if (rate) s.rate = rate.Value();
         s.can_play_pause = info.Controls().IsPlayPauseToggleEnabled() ||
                            info.Controls().IsPlayEnabled() || info.Controls().IsPauseEnabled();
+        s.can_seek = info.Controls().IsPlaybackPositionEnabled();
         auto key = s.source_app + "|" + s.title + "|" + s.artist + "|" + s.album;
         if (key != art_key) {
           art_key = key;
@@ -161,6 +175,21 @@ std::string NowPlayingWin::TogglePlayPause() {
     if (!session) return "unsupported";
     if (!session.GetPlaybackInfo().Controls().IsPlayPauseToggleEnabled()) return "unsupported";
     return session.TryTogglePlayPauseAsync().get() ? "ok" : "failed";
+  } catch (...) {
+    return "failed";
+  }
+}
+
+std::string NowPlayingWin::Seek(int64_t ms) {
+  try {
+    winrt::init_apartment(winrt::apartment_type::multi_threaded);
+    auto mgr = GlobalSystemMediaTransportControlsSessionManager::RequestAsync().get();
+    auto session = PickSession(mgr);
+    if (!session) return "unsupported";
+    if (!session.GetPlaybackInfo().Controls().IsPlaybackPositionEnabled()) return "unsupported";
+    // Position is in 100-ns ticks relative to the timeline start.
+    auto start = session.GetTimelineProperties().StartTime().count();
+    return session.TryChangePlaybackPositionAsync(start + ms * 10000).get() ? "ok" : "failed";
   } catch (...) {
     return "failed";
   }

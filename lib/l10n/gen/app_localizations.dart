@@ -245,17 +245,47 @@ abstract class AppLocalizations {
   /// **'Now-playing info isn\'t available on this system'**
   String get sourceUnavailable;
 
-  /// No description provided for @lyricsBy.
-  ///
-  /// In en, this message translates to:
-  /// **'Lyrics from LRCLIB'**
-  String get lyricsBy;
-
   /// No description provided for @resumeFollow.
   ///
   /// In en, this message translates to:
   /// **'Back to current line'**
   String get resumeFollow;
+
+  /// No description provided for @lyricsFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'Lyrics from {source}'**
+  String lyricsFrom(String source);
+
+  /// No description provided for @seekUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'This player doesn\'t allow seeking'**
+  String get seekUnsupported;
+
+  /// No description provided for @commandFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The player didn\'t accept the request'**
+  String get commandFailed;
+
+  /// No description provided for @instrumental.
+  ///
+  /// In en, this message translates to:
+  /// **'Instrumental'**
+  String get instrumental;
+
+  /// No description provided for @translation.
+  ///
+  /// In en, this message translates to:
+  /// **'Translation'**
+  String get translation;
+
+  /// No description provided for @romanization.
+  ///
+  /// In en, this message translates to:
+  /// **'Romanization'**
+  String get romanization;
 }
 
 class _AppLocalizationsDelegate

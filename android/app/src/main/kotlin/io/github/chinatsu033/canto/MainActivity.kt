@@ -35,6 +35,8 @@ class MainActivity : FlutterActivity() {
                         "get" -> result.success(snapshot())
                         "playPause" -> result.success(playPause())
                         "favorite" -> result.success(favorite())
+                        "seek" -> result.success(seek((call.argument<Number>("positionMs") ?: 0).toLong()))
+                        "goToQueueItem" -> result.success(goTo(call.argument<String>("id")?.toLongOrNull()))
                         else -> result.notImplemented()
                     }
                 } catch (e: SecurityException) {
@@ -112,11 +114,14 @@ class MainActivity : FlutterActivity() {
             "canPlayPause" to (actions and (PlaybackState.ACTION_PLAY_PAUSE or
                 PlaybackState.ACTION_PLAY or PlaybackState.ACTION_PAUSE) != 0L),
             "canFavorite" to (favoriteAction(c) != null || canRate(c)),
+            "canSeek" to (actions and PlaybackState.ACTION_SEEK_TO != 0L),
+            "canGoToQueueItem" to (actions and PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM != 0L),
             "queue" to queue?.takeIf { it.isNotEmpty() }?.map { q ->
                 mapOf(
                     "title" to (q.description.title?.toString() ?: ""),
                     "artist" to q.description.subtitle?.toString(),
                     "current" to (q.queueId == activeId),
+                    "id" to q.queueId.toString(),
                 )
             },
         )
@@ -137,6 +142,20 @@ class MainActivity : FlutterActivity() {
         val c = controller() ?: return "unsupported"
         val playing = c.playbackState?.state == PlaybackState.STATE_PLAYING
         if (playing) c.transportControls.pause() else c.transportControls.play()
+        return "ok"
+    }
+
+    private fun seek(ms: Long): String {
+        val c = controller() ?: return "unsupported"
+        if ((c.playbackState?.actions ?: 0L) and PlaybackState.ACTION_SEEK_TO == 0L) return "unsupported"
+        c.transportControls.seekTo(ms)
+        return "ok"
+    }
+
+    private fun goTo(id: Long?): String {
+        val c = controller() ?: return "unsupported"
+        if (id == null || (c.playbackState?.actions ?: 0L) and PlaybackState.ACTION_SKIP_TO_QUEUE_ITEM == 0L) return "unsupported"
+        c.transportControls.skipToQueueItem(id)
         return "ok"
     }
 

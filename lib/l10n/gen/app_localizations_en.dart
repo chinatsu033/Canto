@@ -88,8 +88,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'Now-playing info isn\'t available on this system';
 
   @override
-  String get lyricsBy => 'Lyrics from LRCLIB';
+  String get resumeFollow => 'Back to current line';
 
   @override
-  String get resumeFollow => 'Back to current line';
+  String lyricsFrom(String source) {
+    return 'Lyrics from $source';
+  }
+
+  @override
+  String get seekUnsupported => 'This player doesn\'t allow seeking';
+
+  @override
+  String get commandFailed => 'The player didn\'t accept the request';
+
+  @override
+  String get instrumental => 'Instrumental';
+
+  @override
+  String get translation => 'Translation';
+
+  @override
+  String get romanization => 'Romanization';
 }

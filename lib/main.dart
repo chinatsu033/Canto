@@ -28,7 +28,9 @@ Future<void> main() async {
       await windowManager.focus();
     });
   }
-  final controller = CantoController(source: NowPlayingSource.create())..start();
+  final controller = CantoController(source: NowPlayingSource.create())
+    ..loadPrefs()
+    ..start();
   runApp(CantoApp(controller: controller, desktop: isDesktop));
 }
 

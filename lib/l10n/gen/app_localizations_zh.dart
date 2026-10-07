@@ -22,7 +22,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get loadingLyrics => '正在查找歌词…';
 
   @override
-  String get noLyrics => '未找到歌词';
+  String get noLyrics => '暂无歌词';
 
   @override
   String get plainLyricsNote => '非同步歌词（无时间轴）';
@@ -85,10 +85,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sourceUnavailable => '此系统无法提供正在播放信息';
 
   @override
-  String get lyricsBy => '歌词来自 LRCLIB';
+  String get resumeFollow => '回到当前行';
 
   @override
-  String get resumeFollow => '回到当前行';
+  String lyricsFrom(String source) {
+    return '歌词来自 $source';
+  }
+
+  @override
+  String get seekUnsupported => '该播放器不支持跳转进度';
+
+  @override
+  String get commandFailed => '播放器未接受该操作';
+
+  @override
+  String get instrumental => '纯音乐';
+
+  @override
+  String get translation => '翻译';
+
+  @override
+  String get romanization => '罗马音';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -108,7 +125,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get loadingLyrics => '正在查找歌詞…';
 
   @override
-  String get noLyrics => '找不到歌詞';
+  String get noLyrics => '暫無歌詞';
 
   @override
   String get plainLyricsNote => '非同步歌詞（無時間軸）';
@@ -171,8 +188,25 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get sourceUnavailable => '此系統無法提供正在播放資訊';
 
   @override
-  String get lyricsBy => '歌詞來自 LRCLIB';
+  String get resumeFollow => '回到目前行';
 
   @override
-  String get resumeFollow => '回到目前行';
+  String lyricsFrom(String source) {
+    return '歌詞來自 $source';
+  }
+
+  @override
+  String get seekUnsupported => '該播放器不支援跳轉進度';
+
+  @override
+  String get commandFailed => '播放器未接受該操作';
+
+  @override
+  String get instrumental => '純音樂';
+
+  @override
+  String get translation => '翻譯';
+
+  @override
+  String get romanization => '羅馬拼音';
 }

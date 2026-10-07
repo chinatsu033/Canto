@@ -15,6 +15,7 @@ final _path = DBusObjectPath('/org/mpris/MediaPlayer2');
 class MprisSource extends NowPlayingSource {
   DBusClient? _client;
   String? _active;
+  DBusObjectPath? _trackId;
   String? _artUrl;
   List<int>? _artBytes;
 
@@ -54,6 +55,7 @@ class MprisSource extends NowPlayingSource {
       final posUs = props['Position']?.toNative();
       final rootProps = await obj.getAllProperties(_root).catchError((_) => <String, DBusValue>{});
       final hasTrackList = rootProps['HasTrackList']?.toNative() == true;
+      _trackId = meta['mpris:trackid'] is DBusObjectPath ? meta['mpris:trackid'] as DBusObjectPath : null;
       final title = str('xesam:title');
       if (title.isEmpty) return null;
       final art = await _artwork(str('mpris:artUrl'));
@@ -71,6 +73,8 @@ class MprisSource extends NowPlayingSource {
         sourceName: rootProps['Identity']?.toNative()?.toString() ?? name.substring(_root.length + 1),
         canPlayPause: props['CanPause']?.toNative() != false || props['CanPlay']?.toNative() != false,
         canFavorite: false, // MPRIS has no standard favorite/rating command
+        canSeek: props['CanSeek']?.toNative() == true && meta['mpris:trackid'] != null,
+        canGoToQueueItem: hasTrackList,
         queue: hasTrackList ? await _queue(obj, meta['mpris:trackid']?.toString()) : null,
       );
     } catch (_) {
@@ -91,6 +95,7 @@ class MprisSource extends NowPlayingSource {
             m['xesam:title']?.toString() ?? '',
             m["xesam:artist"] is Iterable ? (m["xesam:artist"] as Iterable).join(', ') : m['xesam:artist']?.toString(),
             current: m['mpris:trackid']?.toString() == currentId,
+            id: (m['mpris:trackid'] as DBusObjectPath?)?.value,
           )
       ];
     } catch (_) {
@@ -129,6 +134,31 @@ class MprisSource extends NowPlayingSource {
 
   @override
   Future<CommandResult> favorite() async => CommandResult.unsupported;
+
+  @override
+  Future<CommandResult> seek(Duration position) async {
+    final n = _active, id = _trackId;
+    if (n == null || id == null) return CommandResult.unsupported;
+    try {
+      await DBusRemoteObject(client, name: n, path: _path)
+          .callMethod(_player, 'SetPosition', [id, DBusInt64(position.inMicroseconds)]);
+      return CommandResult.ok;
+    } catch (_) {
+      return CommandResult.failed;
+    }
+  }
+
+  @override
+  Future<CommandResult> goToQueueItem(String id) async {
+    final n = _active;
+    if (n == null) return CommandResult.unsupported;
+    try {
+      await DBusRemoteObject(client, name: n, path: _path).callMethod(_tracklist, 'GoTo', [DBusObjectPath(id)]);
+      return CommandResult.ok;
+    } catch (_) {
+      return CommandResult.failed;
+    }
+  }
 
   @override
   void dispose() {

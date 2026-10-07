@@ -67,7 +67,7 @@ void main() {
 
     for (final dark in [false, true]) {
       for (final lyricsView in [false, true]) {
-        final ctl = CantoController(source: _FakeSource(), fetchLyrics: (_) async => SyncedLyrics(parseLrc(placeholderLrc)));
+        final ctl = CantoController(source: _FakeSource(), fetchLyrics: (_) async => (SyncedLyrics(parseLrc(placeholderLrc)), 'LRCLIB'));
         final np = NowPlaying(
           title: 'Placeholder Song',
           artist: 'Demo Artist',
@@ -79,8 +79,17 @@ void main() {
           artwork: art,
           sourceApp: 'com.spotify.music',
           sourceName: 'Demo Player',
+          canSeek: true,
+          canFavorite: true,
         );
         await tester.runAsync(() => ctl.update(np));
+        if (dark) {
+          // Placeholder translation/romanization to show the toggles on.
+          ctl.translation = {for (var i = 0; i < 8; i++) i: '（占位译文 $i）'};
+          ctl.romanization = {for (var i = 0; i < 8; i++) i: 'placeholder romaji $i'};
+          ctl.showTranslation = true;
+          ctl.showRomanization = lyricsView;
+        }
         await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
         final key = GlobalKey();
         await tester.pumpWidget(RepaintBoundary(

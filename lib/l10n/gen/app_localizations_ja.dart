@@ -86,8 +86,25 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sourceUnavailable => 'このシステムでは再生中情報を取得できません';
 
   @override
-  String get lyricsBy => '歌詞提供：LRCLIB';
+  String get resumeFollow => '現在の行に戻る';
 
   @override
-  String get resumeFollow => '現在の行に戻る';
+  String lyricsFrom(String source) {
+    return '歌詞提供：$source';
+  }
+
+  @override
+  String get seekUnsupported => 'このプレーヤーはシークに対応していません';
+
+  @override
+  String get commandFailed => 'プレーヤーが操作を受け付けませんでした';
+
+  @override
+  String get instrumental => 'インストゥルメンタル';
+
+  @override
+  String get translation => '翻訳';
+
+  @override
+  String get romanization => 'ローマ字';
 }

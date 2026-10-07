@@ -4,7 +4,7 @@
   "nothingPlaying": "目前沒有正在播放的內容",
   "nothingPlayingHint": "在任意音樂 App 中播放音樂。Canto 只讀取系統的正在播放資訊。",
   "loadingLyrics": "正在查找歌詞…",
-  "noLyrics": "找不到歌詞",
+  "noLyrics": "暫無歌詞",
   "plainLyricsNote": "非同步歌詞（無時間軸）",
   "lyricsError": "無法連線 LRCLIB",
   "retry": "重試",
@@ -24,6 +24,11 @@
   "permissionBody": "Android 只向擁有通知存取權的 App 提供其他 App 的媒體工作階段。Canto 只讀取媒體資訊，不讀取通知內容。",
   "grantPermission": "開啟設定",
   "sourceUnavailable": "此系統無法提供正在播放資訊",
-  "lyricsBy": "歌詞來自 LRCLIB",
-  "resumeFollow": "回到目前行"
+  "resumeFollow": "回到目前行",
+  "lyricsFrom": "歌詞來自 {source}",
+  "seekUnsupported": "該播放器不支援跳轉進度",
+  "commandFailed": "播放器未接受該操作",
+  "instrumental": "純音樂",
+  "translation": "翻譯",
+  "romanization": "羅馬拼音"
 }

@@ -6,7 +6,8 @@ class QueueItem {
   final String title;
   final String? artist;
   final bool current;
-  const QueueItem(this.title, this.artist, {this.current = false});
+  final String? id; // platform queue id (Android queueId, MPRIS track path)
+  const QueueItem(this.title, this.artist, {this.current = false, this.id});
 }
 
 /// Snapshot of the system now-playing session. Never contains audio.
@@ -24,6 +25,8 @@ class NowPlaying {
   final String sourceName;
   final bool canPlayPause;
   final bool canFavorite;
+  final bool canSeek;
+  final bool canGoToQueueItem;
   final List<QueueItem>? queue; // null => player doesn't expose a queue
 
   const NowPlaying({
@@ -40,8 +43,16 @@ class NowPlaying {
     this.sourceName = '',
     this.canPlayPause = true,
     this.canFavorite = false,
+    this.canSeek = false,
+    this.canGoToQueueItem = false,
     this.queue,
   });
+
+  NowPlaying withPosition(Duration p) => NowPlaying(
+        title: title, artist: artist, album: album, duration: duration, position: p,
+        positionAt: DateTime.now(), playing: playing, rate: rate, artwork: artwork,
+        sourceApp: sourceApp, sourceName: sourceName, canPlayPause: canPlayPause,
+        canFavorite: canFavorite, canSeek: canSeek, canGoToQueueItem: canGoToQueueItem, queue: queue);
 
   String get trackKey => '$sourceApp|$title|$artist|$album';
 
@@ -68,12 +79,14 @@ class NowPlaying {
       sourceName: (m['sourceName'] as String?) ?? '',
       canPlayPause: m['canPlayPause'] != false,
       canFavorite: m['canFavorite'] == true,
+      canSeek: m['canSeek'] == true,
+      canGoToQueueItem: m['canGoToQueueItem'] == true,
       queue: q == null
           ? null
           : [
               for (final e in q.cast<Map<dynamic, dynamic>>())
                 QueueItem((e['title'] as String?) ?? '', e['artist'] as String?,
-                    current: e['current'] == true)
+                    current: e['current'] == true, id: e['id']?.toString())
             ],
     );
   }
