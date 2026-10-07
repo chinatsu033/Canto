@@ -1,0 +1,9 @@
+#include "../../Flutter/Flutter-Release.xcconfig"
+#include "Warnings.xcconfig"
+
+// Ship one slice per runner (arm64 on macos-15, x86_64 on macos-15-intel)
+// instead of flutter_tools' default universal binary.
+CANTO_HOST_ARCH_arm64e = arm64
+CANTO_HOST_ARCH_arm64 = arm64
+CANTO_HOST_ARCH_x86_64 = x86_64
+ARCHS = $(CANTO_HOST_ARCH_$(NATIVE_ARCH_ACTUAL):default=$(NATIVE_ARCH))

@@ -1,0 +1,36 @@
+{
+  "@@locale": "en",
+  "appTitle": "Canto",
+  "nothingPlaying": "Nothing is playing",
+  "nothingPlayingHint": "Play something in any music app. Canto only reads the system's now-playing info.",
+  "loadingLyrics": "Looking up lyrics…",
+  "noLyrics": "No lyrics found",
+  "plainLyricsNote": "Unsynced lyrics (no timing)",
+  "lyricsError": "Could not reach LRCLIB",
+  "retry": "Retry",
+  "play": "Play",
+  "pause": "Pause",
+  "favorite": "Favorite",
+  "favoriteSent": "Sent to {app}",
+  "@favoriteSent": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      }
+    }
+  },
+  "favoriteUnsupported": "This player doesn't let other apps favorite tracks",
+  "favoriteFailed": "The player rejected the request",
+  "controlUnsupported": "This player doesn't accept remote control",
+  "upNext": "Up next",
+  "alwaysOnTop": "Always on top",
+  "minimize": "Minimize",
+  "close": "Close",
+  "back": "Back",
+  "permissionTitle": "Notification access needed",
+  "permissionBody": "Android only shares other apps' media sessions with apps that have notification access. Canto reads only media info, never notification content.",
+  "grantPermission": "Open settings",
+  "sourceUnavailable": "Now-playing info isn't available on this system",
+  "lyricsBy": "Lyrics from LRCLIB",
+  "resumeFollow": "Back to current line"
+}

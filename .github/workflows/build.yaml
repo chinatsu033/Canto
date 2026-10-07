@@ -1,0 +1,161 @@
+name: build
+
+# Cost note: Linux x86 (and Android when possible) are built locally by the
+# maintainer; CI covers the platforms that need their own OS. Pass
+# `platforms` to build others in CI too.
+on:
+  workflow_dispatch:
+    inputs:
+      platforms:
+        description: 'Comma separated: android,windows,macos,linux,linux-arm64'
+        default: 'windows,macos,linux-arm64'
+  push:
+    tags:
+      - 'v*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FLUTTER_VERSION: '3.47.1'
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      include: ${{ steps.select.outputs.include }}
+    steps:
+      - id: select
+        env:
+          PLATFORMS: ${{ github.event.inputs.platforms || vars.TAG_PLATFORMS || 'windows,macos,linux-arm64' }}
+        run: |
+          all='[
+            {"platform":"android","target":"android","os":"ubuntu-latest"},
+            {"platform":"windows","target":"windows","os":"windows-2022","arch":"x86"},
+            {"platform":"macos","target":"macos","os":"macos-15-intel","arch":"x86"},
+            {"platform":"macos","target":"macos","os":"macos-15","arch":"arm64"},
+            {"platform":"linux","target":"linux","os":"ubuntu-22.04","arch":"x86"},
+            {"platform":"linux-arm64","target":"linux","os":"ubuntu-24.04-arm","arch":"arm64","flutter_channel":"master"}
+          ]'
+          include="$(jq -c --arg p "$PLATFORMS" \
+            '($p | gsub(" "; "") | split(",")) as $w | map(select(.platform as $x | $w | index($x)))' <<<"$all")"
+          test "$include" != '[]' || { echo "No platform matches '$PLATFORMS'" >&2; exit 1; }
+          echo "include=$include" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: [ matrix ]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.matrix.outputs.include) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Android signing
+        if: matrix.target == 'android'
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 --decode > android/app/keystore.jks
+            { echo; echo "keyAlias=$KEY_ALIAS"; echo "storePassword=$STORE_PASSWORD"; echo "keyPassword=$KEY_PASSWORD"; } >> android/local.properties
+          else
+            echo "::warning::KEYSTORE secret missing, APK will be debug-signed"
+          fi
+
+      - name: Setup Java
+        if: matrix.target == 'android'
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Linux build deps
+        if: matrix.target == 'linux'
+        run: sudo apt-get update -q && sudo apt-get install -y -q clang cmake ninja-build pkg-config libgtk-3-dev file libfuse2 || sudo apt-get install -y -q clang cmake ninja-build pkg-config libgtk-3-dev file
+
+      # No stable Linux arm64 SDK archive; master clones the pinned tag.
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: ${{ matrix.flutter_channel || 'stable' }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: Setup Xcode
+        if: matrix.target == 'macos'
+        run: |
+          xcode="$(ls -d /Applications/Xcode_26*.app 2>/dev/null | grep -v -i beta | sort -V | tail -n 1)"
+          test -n "$xcode" || xcode="$(ls -d /Applications/Xcode_*.app | grep -v -i beta | sort -V | tail -n 1)"
+          sudo xcode-select -s "$xcode"
+          xcodebuild -version
+
+      - name: Test
+        if: matrix.target == 'linux' || matrix.target == 'android'
+        run: flutter test
+
+      - name: Build Android
+        if: matrix.target == 'android'
+        run: |
+          flutter build apk --release
+          v="$(grep '^version:' pubspec.yaml | sed 's/version: //; s/+.*//')"
+          mkdir -p dist && cp build/app/outputs/flutter-apk/app-release.apk "dist/Canto-$v-android.apk"
+
+      - name: Build Windows
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          flutter build windows --release
+          $v = (Select-String -Path pubspec.yaml -Pattern '^version: (.*)\+').Matches[0].Groups[1].Value
+          New-Item -ItemType Directory -Force dist | Out-Null
+          Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath "dist\Canto-$v-windows-x86.zip"
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\iscc.exe" "/DMyVersion=$v" packaging\windows\canto.iss
+          Get-ChildItem dist
+
+      - name: Build macOS
+        if: matrix.target == 'macos'
+        run: |
+          flutter build macos --release
+          bin=build/macos/Build/Products/Release/Canto.app/Contents/MacOS/Canto
+          want=$([ "${{ matrix.arch }}" = arm64 ] && echo arm64 || echo x86_64)
+          echo "$bin: $(lipo -archs "$bin")"; test "$(lipo -archs "$bin")" = "$want"
+          bash packaging/package_macos.sh ${{ matrix.arch }}
+
+      - name: Build Linux
+        if: matrix.target == 'linux'
+        run: |
+          flutter build linux --release
+          bash packaging/package_linux.sh ${{ matrix.arch }}
+          want=$([ "${{ matrix.arch }}" = arm64 ] && echo aarch64 || echo x86-64)
+          file build/linux/*/release/bundle/Canto | grep -q "$want"
+          dpkg-deb --info dist/*.deb
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: artifact-${{ matrix.platform }}${{ matrix.arch && format('-{0}', matrix.arch) || '' }}
+          path: ./dist
+          overwrite: true
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [ build ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: ./dist/
+          pattern: artifact-*
+          merge-multiple: true
+      - run: cd dist && sha256sum ./* > SHA256SUMS && cat SHA256SUMS
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: ./dist/*
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          body_path: ./.github/release_notes.md
